@@ -75,7 +75,7 @@ paper_supplies = [
 
 # Given below are some utility functions you can use to implement your multi-agent system
 
-def generate_sample_inventory(paper_supplies: list, coverage: float = 0.4, seed: int = 137) -> pd.DataFrame:
+def generate_sample_inventory(paper_supplies: list, coverage: float = 1.0, seed: int = 137) -> pd.DataFrame:
     """
     Generate inventory for exactly a specified percentage of items from the full paper supply list.
 
@@ -89,7 +89,7 @@ def generate_sample_inventory(paper_supplies: list, coverage: float = 0.4, seed:
     Args:
         paper_supplies (list): A list of dictionaries, each representing a paper item with
                                keys 'item_name', 'category', and 'unit_price'.
-        coverage (float, optional): Fraction of items to include in the inventory (default is 0.4, or 40%).
+        coverage (float, optional): Fraction of items to include in the inventory (default is 1, or 100%).
         seed (int, optional): Random seed for reproducibility (default is 137).
 
     Returns:
@@ -1167,18 +1167,50 @@ def build_multi_agent_system(model_id: str = "gpt-4o-mini"):
             if shortage:
                 restock_cost = round(float(matches.iloc[0]["unit_price"]) * shortage, 2)
                 available_cash = get_cash_balance(request_date)
-                outcome["status"] = "declined"
-                outcome["reason"] = (
-                    f"Only {current_stock} units are available on the request date; "
-                    f"{quantity} were requested. No transaction was recorded."
-                )
-                outcome["restock_recommended"] = True
-                outcome["restock_quantity"] = shortage
-                outcome["estimated_delivery_date"] = get_supplier_delivery_date(
+                estimated_delivery_date = get_supplier_delivery_date(
                     request_date,
                     shortage,
                 )
+                outcome["restock_quantity"] = shortage
+                outcome["estimated_delivery_date"] = estimated_delivery_date
                 outcome["restock_fundable"] = restock_cost <= available_cash
+                if restock_cost > available_cash:
+                    outcome["status"] = "declined"
+                    outcome["reason"] = (
+                        f"Only {current_stock} units are available, but "
+                        f"{quantity} were requested. Restocking {shortage} "
+                        f"units costs ${restock_cost:.2f}, while available "
+                        f"cash is ${available_cash:.2f}. "
+                        "The restock was not placed."
+                    )
+                    outcome["restock_recommended"] = True
+                else:
+                    # Place the actual restock order.
+                    restock_result = place_restock_order(
+                        item_name=item_name,
+                        quantity=shortage,
+                        request_date=request_date,
+                    )
+
+                    # Adapt these checks to the exact return structure
+                    # of your existing place_restock_order() function.
+                    if restock_result.get("success"):
+                        outcome["status"] = "scheduled"
+                        outcome["reason"] = (
+                            f"Only {current_stock} units were available. "
+                            f"A restock of {shortage} units was placed, "
+                            "and the customer order is scheduled pending delivery."
+                        )
+                        outcome["restock_recommended"] = False
+                        outcome["restock_transaction_id"] = (
+                            restock_result.get("transaction_id")
+                        )
+                    else:
+                        outcome["status"] = "declined"
+                        outcome["reason"] = (
+                            "The restock could not be placed. "
+                            "No customer sale was recorded."
+                        )
             else:
                 sale_id = record_request_transaction(
                     request_id,
@@ -1310,6 +1342,8 @@ def run_test_scenarios():
                 }
 
         actions = reconcile_request_actions(request, active_request_context["actions"])
+        print("Requested product outcomes:")
+   
         successful_actions = [
             action for action in actions
             if action.get("status") in {"fulfilled", "scheduled"}
@@ -1319,26 +1353,39 @@ def run_test_scenarios():
         if not actions:
             fulfillment_status = "not_processed"
             fulfillment_reason = (
-                "The agents did not submit an item and quantity that could be validated "
-                "against the request and seeded catalog; no transaction was recorded."
+                "No requested items could be validated against the catalog; "
+                "no verified fulfillment was recorded."
             )
-            response = (
-                "We could not process this request because no item and quantity were "
-                "validated against the catalog. No order was recorded."
-            )
-        elif successful_actions and declined_actions:
-            fulfillment_status = "partially_fulfilled"
-            fulfillment_reason = "Some requested items were fulfilled; other items could not be fulfilled."
-        elif successful_actions and all(action["status"] == "scheduled" for action in successful_actions):
-            fulfillment_status = "scheduled"
-            fulfillment_reason = "All processed items are scheduled, not yet delivered."
-        elif successful_actions:
+
+        elif all(action.get("status") == "fulfilled" for action in actions):
             fulfillment_status = "fulfilled"
-            fulfillment_reason = "The recorded fulfilled actions passed inventory and transaction checks."
+            fulfillment_reason = (
+                "All requested items were fulfilled and their transactions verified."
+            )
+
+        elif all(action.get("status") == "scheduled" for action in actions):
+            fulfillment_status = "scheduled"
+            fulfillment_reason = (
+                "All processed items are scheduled, not yet fulfilled."
+            )
+
+        elif any(
+            action.get("status") in {"fulfilled", "scheduled"}
+            for action in actions
+        ):
+            fulfillment_status = "partially_fulfilled"
+            fulfillment_reason = (
+                "Some items were fulfilled or scheduled, while others "
+                "could not be fulfilled."
+            )
+
         else:
             fulfillment_status = "declined"
             fulfillment_reason = "; ".join(
-                dict.fromkeys(action.get("reason", "Request item was declined.") for action in declined_actions)
+                dict.fromkeys(
+                    action.get("reason", "Request item was declined.")
+                    for action in actions
+                )
             )
 
         if actions:

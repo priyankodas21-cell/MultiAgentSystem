@@ -811,7 +811,7 @@ def place_restock_order(
         )
 
     delivery_date = get_supplier_delivery_date(order_date_str, quantity)
-    transaction_id = create_transaction(
+    transaction_id = record_request_transaction(
         request_id,
         item_name,
         "stock_orders",
@@ -922,15 +922,20 @@ def item_quantity_is_explicitly_requested(
 ) -> bool:
     """Check for one unique catalog match in the same source clause as the quantity."""
     quantity_pattern = re.compile(
-        r"(?<![\w])(?P<quantity>\d[\d,]*)\s+(?:(?:paper\s+)?napkins?|sheets?|reams?|rolls?|packets?|"
-        r"boxes?|packs?|pieces?|units?|cards?|cups?|plates?|boards?|flyers?|posters?|"
-        r"tickets?|envelopes?|pads?|tags?|streamers?|balloons?)\b\s*(?:of\s+)?",
+        r"(?<![\w])(?P<quantity>\d[\d,]*)\s+"
+        r"(?:(?:paper|table)\s+)?"
+        r"(?:napkins?|cups?|plates?|sheets?|reams?|rolls?|packets?|"
+        r"boxes?|packs?|pieces?|units?|cards?|boards?|flyers?|posters?|"
+        r"tickets?|envelopes?|pads?|tags?|streamers?|balloons?)"
+        r"\b\s*(?:of\s+)?",
         re.IGNORECASE,
     )
     quantity_matches = list(quantity_pattern.finditer(request_text))
 
     for index, quantity_match in enumerate(quantity_matches):
-        parsed_quantity = int(quantity_match.group("quantity").replace(",", ""))
+        parsed_quantity = int(
+            quantity_match.group("quantity").replace(",", "")
+        )
         if parsed_quantity != quantity:
             continue
 
@@ -939,12 +944,28 @@ def item_quantity_is_explicitly_requested(
             if index + 1 < len(quantity_matches)
             else len(request_text)
         )
-        clause = request_text[quantity_match.end():clause_end]
+
+        # Include the quantity and product words consumed by the regex.
+        clause = request_text[quantity_match.start():clause_end]
+
         for delimiter in ("\n", ";", "!"):
             clause = clause.split(delimiter, maxsplit=1)[0]
-        clause = re.split(r"(?<=[.?])\s+", clause, maxsplit=1)[0]
-        matching_names = catalog_item_candidates(clause, catalog_names)
-        if len(matching_names) == 1 and matching_names[0].casefold() == item_name.casefold():
+
+        clause = re.split(
+            r"(?<=[.?])\s+",
+            clause,
+            maxsplit=1,
+        )[0]
+
+        matching_names = catalog_item_candidates(
+            clause,
+            catalog_names,
+        )
+
+        if (
+            len(matching_names) == 1
+            and matching_names[0].casefold() == item_name.casefold()
+        ):
             return True
 
     return False
@@ -1191,7 +1212,7 @@ def build_multi_agent_system(model_id: str = "gpt-4o-mini"):
                     restock_result = place_restock_order(
                         item_name=item_name,
                         quantity=shortage,
-                        request_date=request_date,
+                        order_date=request_date,
                         request_id=request_id,
                     )
 
@@ -1208,11 +1229,6 @@ def build_multi_agent_system(model_id: str = "gpt-4o-mini"):
                     )
                     outcome["estimated_delivery_date"] = (
                         restock_result["estimated_delivery_date"]
-                    )
-                    outcome["status"] = "declined"
-                    outcome["reason"] = (
-                        "The restock could not be placed. "
-                        "No customer sale was recorded."
                     )
             else:
                 sale_id = record_request_transaction(
@@ -1394,6 +1410,16 @@ def run_test_scenarios():
             fulfillment_reason = (
                 "Some supplier restock orders were recorded, but other "
                 "requested items could not be fulfilled."
+            )
+
+        elif all(
+            action.get("status") == "not_processed"
+            for action in actions
+        ):
+            fulfillment_status = "not_processed"
+            fulfillment_reason = (
+                "No requested items were processed; "
+                "no sale was verified."
             )
 
         else:

@@ -1210,7 +1210,7 @@ def build_multi_agent_system(model_id: str = "gpt-4o-mini"):
                 else:
                     # Place the actual restock order.
                     restock_result = place_restock_order(
-                        item_name=item_name,
+                        item_name=canonical_name,
                         quantity=shortage,
                         order_date=request_date,
                         request_id=request_id,
@@ -1365,7 +1365,8 @@ def run_test_scenarios():
    
         successful_actions = [
             action for action in actions
-            if action.get("status") in {"fulfilled", "scheduled"}
+            if action.get("status") == "fulfilled"
+            and bool(action.get("transaction_ids"))
         ]
         restock_actions = [
             action for action in actions
@@ -1381,6 +1382,7 @@ def run_test_scenarios():
 
         elif all(
             action.get("status") == "fulfilled"
+            and bool(action.get("transaction_ids"))
             for action in actions
         ):
             fulfillment_status = "fulfilled"

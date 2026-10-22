@@ -771,6 +771,7 @@ def place_restock_order(
     item_name: str,
     quantity: int,
     order_date: Union[str, datetime],
+    request_id: int,
 ) -> Dict[str, Union[str, int, float]]:
     """Record a funded restock for an inventoried item, dated at its estimated arrival."""
     if not isinstance(quantity, int) or isinstance(quantity, bool) or quantity <= 0:
@@ -811,6 +812,7 @@ def place_restock_order(
 
     delivery_date = get_supplier_delivery_date(order_date_str, quantity)
     transaction_id = create_transaction(
+        request_id,
         item_name,
         "stock_orders",
         quantity,
@@ -1190,27 +1192,28 @@ def build_multi_agent_system(model_id: str = "gpt-4o-mini"):
                         item_name=item_name,
                         quantity=shortage,
                         request_date=request_date,
+                        request_id=request_id,
                     )
 
-                    # Adapt these checks to the exact return structure
-                    # of your existing place_restock_order() function.
-                    if restock_result.get("success"):
-                        outcome["status"] = "scheduled"
-                        outcome["reason"] = (
-                            f"Only {current_stock} units were available. "
-                            f"A restock of {shortage} units was placed, "
-                            "and the customer order is scheduled pending delivery."
-                        )
-                        outcome["restock_recommended"] = False
-                        outcome["restock_transaction_id"] = (
-                            restock_result.get("transaction_id")
-                        )
-                    else:
-                        outcome["status"] = "declined"
-                        outcome["reason"] = (
-                            "The restock could not be placed. "
-                            "No customer sale was recorded."
-                        )
+                    # A restock is not a completed customer sale.
+                    outcome["status"] = "restock_ordered"
+                    outcome["reason"] = (
+                        f"Only {current_stock} units were available. "
+                        f"A supplier restock of {shortage} units was recorded. "
+                        "The customer order has not yet been fulfilled."
+                    )
+                    outcome["restock_recommended"] = False
+                    outcome["restock_transaction_id"] = (
+                        restock_result["transaction_id"]
+                    )
+                    outcome["estimated_delivery_date"] = (
+                        restock_result["estimated_delivery_date"]
+                    )
+                    outcome["status"] = "declined"
+                    outcome["reason"] = (
+                        "The restock could not be placed. "
+                        "No customer sale was recorded."
+                    )
             else:
                 sale_id = record_request_transaction(
                     request_id,
@@ -1348,7 +1351,10 @@ def run_test_scenarios():
             action for action in actions
             if action.get("status") in {"fulfilled", "scheduled"}
         ]
-        declined_actions = [action for action in actions if action.get("status") in {"declined", "not_processed"}]
+        restock_actions = [
+            action for action in actions
+            if action.get("status") == "restock_ordered"
+        ]
 
         if not actions:
             fulfillment_status = "not_processed"
@@ -1357,26 +1363,37 @@ def run_test_scenarios():
                 "no verified fulfillment was recorded."
             )
 
-        elif all(action.get("status") == "fulfilled" for action in actions):
+        elif all(
+            action.get("status") == "fulfilled"
+            for action in actions
+        ):
             fulfillment_status = "fulfilled"
             fulfillment_reason = (
                 "All requested items were fulfilled and their transactions verified."
             )
 
-        elif all(action.get("status") == "scheduled" for action in actions):
-            fulfillment_status = "scheduled"
-            fulfillment_reason = (
-                "All processed items are scheduled, not yet fulfilled."
-            )
-
-        elif any(
-            action.get("status") in {"fulfilled", "scheduled"}
+        elif all(
+            action.get("status") == "restock_ordered"
             for action in actions
         ):
+            fulfillment_status = "restock_ordered"
+            fulfillment_reason = (
+                "Supplier restock orders were recorded, but customer "
+                "orders have not yet been fulfilled."
+            )
+
+        elif successful_actions:
             fulfillment_status = "partially_fulfilled"
             fulfillment_reason = (
-                "Some items were fulfilled or scheduled, while others "
-                "could not be fulfilled."
+                "Some requested items were fulfilled, while other items "
+                "remain pending restocking or could not be fulfilled."
+            )
+
+        elif restock_actions:
+            fulfillment_status = "partially_processed"
+            fulfillment_reason = (
+                "Some supplier restock orders were recorded, but other "
+                "requested items could not be fulfilled."
             )
 
         else:
@@ -1399,11 +1416,14 @@ def run_test_scenarios():
                         f"${action['sale_total']:.2f} "
                         f"({quantity} x ${action['unit_price']:.2f} catalog unit price; no discount applied)."
                     )
-                elif action["status"] == "scheduled":
+                elif action["status"] == "restock_ordered":
                     response_lines.append(
-                        f"Scheduled {quantity} units of {item_name} for "
-                        f"${action['sale_total']:.2f}; estimated delivery "
-                        f"{action['estimated_delivery_date']}."
+                        f"Supplier restock recorded: "
+                        f"{action['restock_quantity']} units of {item_name}; "
+                        f"estimated supplier arrival "
+                        f"{action['estimated_delivery_date']}. "
+                        f"The customer order for {quantity} units "
+                        "has not yet been fulfilled."
                     )
                 else:
                     restock_note = ""

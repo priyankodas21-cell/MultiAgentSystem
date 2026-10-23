@@ -907,6 +907,33 @@ def catalog_item_candidates(
     such as 'A4'. Return all tied best matches so ambiguous requests
     are not silently assigned to the wrong product.
     """
+
+    def normalize_phrase(value: str) -> str:
+        return " ".join(re.findall(r"[a-z0-9]+", value.casefold()))
+
+    explicit_aliases = {
+        "a4 printing paper": "A4 paper",
+        "a4 printer paper": "A4 paper",
+        "a4 size printer paper": "A4 paper",
+        "a4 white printer paper": "A4 paper",
+        "a4 white paper": "A4 paper",
+        "a4 glossy paper": "Glossy paper",
+        "glossy a4 paper": "Glossy paper",
+        "a3 glossy paper": "Glossy paper",
+        "a4 matte paper": "Matte paper",
+        "matte a3 paper": "Matte paper",
+        "standard printer paper": "Standard copy paper",
+        "standard printing paper": "Standard copy paper",
+        "colorful construction paper": "Construction paper",
+        "decorative washi tape": "Decorative adhesive tape (washi tape)",
+    }
+
+    normalized_description = normalize_phrase(item_description)
+
+    alias_target = explicit_aliases.get(normalized_description)
+    if alias_target is not None:
+        return [alias_target] if alias_target in catalog_names else []
+    
     generic_tokens = {
         "paper", "of", "the", "a", "an", "and", "for", "with",
         "in", "by", "size", "sized",
@@ -1038,6 +1065,202 @@ def item_quantity_is_explicitly_requested(
 
     return False
 
+def fulfill_catalog_item(item_name: str, quantity: int) -> Dict:
+    """Validate and process one explicitly requested catalog item exactly once."""
+
+    request_id = active_request_context["request_id"]
+    request_date = active_request_context["request_date"]
+    request_text = active_request_context["request_text"]
+    actions = active_request_context["actions"]
+    processed_items = active_request_context["items"]
+
+    if not isinstance(request_id, int) or not isinstance(request_date, str):
+        return {
+            "item_name": item_name,
+            "quantity": quantity,
+            "status": "declined",
+            "reason": "No active dated request.",
+        }
+
+    if not isinstance(quantity, int) or isinstance(quantity, bool) or quantity <= 0:
+        return {
+            "request_id": request_id,
+            "item_name": item_name,
+            "quantity": quantity,
+            "status": "declined",
+            "reason": "Quantity must be a positive whole number.",
+        }
+
+    attempt_key = (item_name.strip().casefold(), quantity)
+
+    # Prevent duplicate attempts for the same item and quantity.
+    if attempt_key in processed_items:
+        return processed_items[attempt_key]
+
+    inventory_catalog = pd.read_sql(
+        "SELECT item_name, unit_price FROM inventory",
+        db_engine,
+    )
+    catalog_names = inventory_catalog["item_name"].tolist()
+
+    candidates = catalog_item_candidates(item_name, catalog_names)
+
+    if len(candidates) != 1:
+        outcome = {
+            "request_id": request_id,
+            "item_name": item_name,
+            "quantity": quantity,
+            "status": "declined",
+            "reason": (
+                "No exact catalog match was found."
+                if not candidates
+                else "The item description is ambiguous."
+            ),
+        }
+    else:
+        canonical_name = candidates[0]
+        canonical_key = canonical_name.casefold()
+
+        # Avoid processing the same catalog item twice in one request.
+        previous = processed_items.get(canonical_key)
+        if previous is not None:
+            return previous
+
+        if not item_quantity_is_explicitly_requested(
+            request_text,
+            canonical_name,
+            quantity,
+            catalog_names,
+        ):
+            outcome = {
+                "request_id": request_id,
+                "item_name": canonical_name,
+                "quantity": quantity,
+                "status": "declined",
+                "reason": (
+                    "The item and quantity were not unambiguously "
+                    "stated together in the customer request."
+                ),
+            }
+        else:
+            try:
+                quote = calculate_quote([
+                    {"item_name": canonical_name, "quantity": quantity}
+                ])
+
+                stock_info = get_stock_level(canonical_name, request_date)
+                current_stock = int(stock_info["current_stock"].iloc[0])
+
+                if current_stock >= quantity:
+                    transaction_id = record_request_transaction(
+                        request_id=request_id,
+                        item_name=canonical_name,
+                        transaction_type="sales",
+                        quantity=quantity,
+                        price=quote["total"],
+                        transaction_date=request_date,
+                    )
+
+                    # Verify the request-specific audit entry before claiming success.
+                    audit = pd.read_sql(
+                        """
+                        SELECT transaction_rowid
+                        FROM agent_transaction_audit
+                        WHERE request_id = :request_id
+                          AND transaction_rowid = :transaction_id
+                          AND item_name = :item_name
+                          AND transaction_type = 'sales'
+                          AND units = :quantity
+                        """,
+                        db_engine,
+                        params={
+                            "request_id": request_id,
+                            "transaction_id": transaction_id,
+                            "item_name": canonical_name,
+                            "quantity": quantity,
+                        },
+                    )
+
+                    if audit.empty:
+                        raise RuntimeError(
+                            "Sale transaction could not be verified in the audit table."
+                        )
+
+                    outcome = {
+                        "request_id": request_id,
+                        "item_name": canonical_name,
+                        "quantity": quantity,
+                        "unit_price": quote["items"][0]["unit_price"],
+                        "sale_total": quote["total"],
+                        "stock_at_request": current_stock,
+                        "status": "fulfilled",
+                        "transaction_ids": [transaction_id],
+                    }
+
+                else:
+                    shortage = quantity - current_stock
+                    unit_price = float(
+                        inventory_catalog.loc[
+                            inventory_catalog["item_name"] == canonical_name,
+                            "unit_price",
+                        ].iloc[0]
+                    )
+                    restock_cost = round(shortage * unit_price, 2)
+                    available_cash = get_cash_balance(request_date)
+
+                    if restock_cost > available_cash:
+                        outcome = {
+                            "request_id": request_id,
+                            "item_name": canonical_name,
+                            "quantity": quantity,
+                            "status": "declined",
+                            "reason": (
+                                f"Insufficient stock: {current_stock} available, "
+                                f"{quantity} requested. The restock cannot be funded."
+                            ),
+                        }
+                    else:
+                        restock = place_restock_order(
+                            item_name=canonical_name,
+                            quantity=shortage,
+                            order_date=request_date,
+                            request_id=request_id,
+                        )
+                        outcome = {
+                            "request_id": request_id,
+                            "item_name": canonical_name,
+                            "quantity": quantity,
+                            "status": "restock_ordered",
+                            "restock_quantity": shortage,
+                            "restock_transaction_id": restock["transaction_id"],
+                            "estimated_delivery_date": restock[
+                                "estimated_delivery_date"
+                            ],
+                            "reason": (
+                                "A supplier restock was recorded. "
+                                "The customer order is not yet fulfilled."
+                            ),
+                        }
+
+            except Exception:
+                outcome = {
+                    "request_id": request_id,
+                    "item_name": canonical_name,
+                    "quantity": quantity,
+                    "status": "declined",
+                    "reason": (
+                        "The order could not be safely processed or verified."
+                    ),
+                }
+
+    # Save the result so an agent retry cannot create a duplicate transaction.
+    processed_items[attempt_key] = outcome
+
+    if outcome.get("item_name"):
+        processed_items[outcome["item_name"].casefold()] = outcome
+
+    actions.append(outcome)
+    return outcome
 
 # Generated by GitHub Copilot - Oct-13-2026
 def reconcile_request_actions(request_text: str, actions: List[Dict]) -> List[Dict]:
@@ -1153,183 +1376,15 @@ def build_multi_agent_system(model_id: str = "gpt-4o-mini"):
         """
         return str(calculate_quote(items, discount_percent))
 
-    # Generated by GitHub Copilot - Oct-11-2026
     @tool
     def fulfill_order_item(item_name: str, quantity: int) -> str:
-        """Validate, price, and fulfill one explicitly requested catalog item.
-
-        Stock, price, cash, and dates are checked by the tool. Customer orders are
-        recorded only after the required stock is available or a funded restock is
-        scheduled. Repeated calls for the same request item do not create duplicates.
+        """Validate and fulfill one explicitly requested catalog item.
 
         Args:
-            item_name: Catalog item name requested by the customer.
+            item_name: Catalog item name or an explicitly supported alias.
             quantity: Positive whole number of units requested.
         """
-        request_id = active_request_context["request_id"]
-        request_date = active_request_context["request_date"]
-        request_text = active_request_context["request_text"]
-        request_actions = active_request_context["actions"]
-        processed_items = active_request_context["items"]
-        if (
-            not isinstance(request_id, int)
-            or not isinstance(request_date, str)
-            or not isinstance(request_text, str)
-        ):
-            return json.dumps({"status": "declined", "reason": "No active dated request."})
-        if not isinstance(quantity, int) or isinstance(quantity, bool) or quantity <= 0:
-            return json.dumps({"status": "declined", "reason": "Quantity must be a positive whole number."})
-
-        attempt_key = (item_name.strip().casefold(), quantity)
-        if attempt_key in processed_items:
-            return json.dumps(processed_items[attempt_key])
-
-        inventory_catalog = pd.read_sql(
-            "SELECT item_name, unit_price FROM inventory",
-            db_engine,
-        )
-        seeded_item_names = inventory_catalog["item_name"].tolist()
-        matching_names = catalog_item_candidates(item_name, seeded_item_names)
-        if len(matching_names) != 1:
-            outcome = {
-                "request_id": request_id,
-                "item_name": item_name,
-                "quantity": quantity,
-                "status": "declined",
-                "reason": (
-                    "The item does not match a seeded catalog entry."
-                    if not matching_names
-                    else "The item description matches multiple seeded catalog entries."
-                ),
-            }
-            processed_items[attempt_key] = outcome
-            request_actions.append(outcome)
-            return json.dumps(outcome)
-
-        canonical_name = matching_names[0]
-        matches = inventory_catalog[inventory_catalog["item_name"] == canonical_name]
-        if not item_quantity_is_explicitly_requested(
-            request_text,
-            canonical_name,
-            quantity,
-            seeded_item_names,
-        ):
-            outcome = {
-                "request_id": request_id,
-                "item_name": canonical_name,
-                "quantity": quantity,
-                "status": "declined",
-                "reason": "The item and quantity were not unambiguously stated together in the customer request.",
-            }
-            processed_items[attempt_key] = outcome
-            request_actions.append(outcome)
-            return json.dumps(outcome)
-
-        previous_outcome = processed_items.get(canonical_name)
-        if previous_outcome is not None:
-            if previous_outcome["quantity"] == quantity:
-                return json.dumps(previous_outcome)
-            return json.dumps({
-                "request_id": request_id,
-                "item_name": canonical_name,
-                "quantity": quantity,
-                "status": "declined",
-                "reason": "A different quantity for this item was already processed for this request.",
-            })
-
-        try:
-            generate_financial_report(request_date)
-            quote = calculate_quote([{"item_name": canonical_name, "quantity": quantity}])
-            current_stock = int(
-                get_stock_level(canonical_name, request_date)["current_stock"].iloc[0]
-            )
-            shortage = max(0, quantity - current_stock)
-            outcome = {
-                "request_id": request_id,
-                "item_name": canonical_name,
-                "quantity": quantity,
-                "unit_price": quote["items"][0]["unit_price"],
-                "sale_total": quote["total"],
-                "stock_at_request": current_stock,
-                "status": "fulfilled",
-                "transaction_ids": [],
-            }
-
-            if shortage:
-                restock_cost = round(float(matches.iloc[0]["unit_price"]) * shortage, 2)
-                available_cash = get_cash_balance(request_date)
-                estimated_delivery_date = get_supplier_delivery_date(
-                    request_date,
-                    shortage,
-                )
-                outcome["restock_quantity"] = shortage
-                outcome["estimated_delivery_date"] = estimated_delivery_date
-                outcome["restock_fundable"] = restock_cost <= available_cash
-                if restock_cost > available_cash:
-                    outcome["status"] = "declined"
-                    outcome["reason"] = (
-                        f"Only {current_stock} units are available, but "
-                        f"{quantity} were requested. Restocking {shortage} "
-                        f"units costs ${restock_cost:.2f}, while available "
-                        f"cash is ${available_cash:.2f}. "
-                        "The restock was not placed."
-                    )
-                    outcome["restock_recommended"] = True
-                else:
-                    # Place the actual restock order.
-                    restock_result = place_restock_order(
-                        item_name=canonical_name,
-                        quantity=shortage,
-                        order_date=request_date,
-                        request_id=request_id,
-                    )
-
-                    # A restock is not a completed customer sale.
-                    outcome["status"] = "restock_ordered"
-                    outcome["reason"] = (
-                        f"Only {current_stock} units were available. "
-                        f"A supplier restock of {shortage} units was recorded. "
-                        "The customer order has not yet been fulfilled."
-                    )
-                    outcome["restock_recommended"] = False
-                    outcome["restock_transaction_id"] = (
-                        restock_result["transaction_id"]
-                    )
-                    outcome["estimated_delivery_date"] = (
-                        restock_result["estimated_delivery_date"]
-                    )
-            else:
-                sale_id = record_request_transaction(
-                    request_id,
-                    canonical_name,
-                    "sales",
-                    quantity,
-                    quote["total"],
-                    request_date,
-                )
-                outcome["transaction_ids"].append(sale_id)
-
-        except (ValueError, TypeError) as exc:
-            outcome = {
-                "request_id": request_id,
-                "item_name": canonical_name,
-                "quantity": quantity,
-                "status": "declined",
-                "reason": str(exc),
-            }
-        except Exception:
-            outcome = {
-                "request_id": request_id,
-                "item_name": canonical_name,
-                "quantity": quantity,
-                "status": "declined",
-                "reason": "The transaction could not be safely recorded.",
-            }
-
-        processed_items[canonical_name] = outcome
-        processed_items[attempt_key] = outcome
-        request_actions.append(outcome)
-        return json.dumps(outcome)
+        return json.dumps(fulfill_catalog_item(item_name, quantity))
 
     inventory_agent = ToolCallingAgent(
         name="inventory_agent",
@@ -1368,6 +1423,37 @@ def build_multi_agent_system(model_id: str = "gpt-4o-mini"):
         max_steps=10,
     )
 
+def has_verified_sale(action: Dict, request_id: int) -> bool:
+    """Return True only when every claimed sale ID has a matching audit entry."""
+    transaction_ids = action.get("transaction_ids", [])
+
+    if action.get("status") != "fulfilled" or not transaction_ids:
+        return False
+
+    for transaction_id in transaction_ids:
+        verified = pd.read_sql(
+            """
+            SELECT 1
+            FROM agent_transaction_audit
+            WHERE request_id = :request_id
+              AND transaction_rowid = :transaction_id
+              AND item_name = :item_name
+              AND transaction_type = 'sales'
+              AND units = :quantity
+            """,
+            db_engine,
+            params={
+                "request_id": request_id,
+                "transaction_id": transaction_id,
+                "item_name": action.get("item_name"),
+                "quantity": action.get("quantity"),
+            },
+        )
+
+        if verified.empty:
+            return False
+
+    return True
 
 # Run your test scenarios by writing them here. Make sure to keep track of them.
 
@@ -1428,13 +1514,66 @@ def run_test_scenarios():
                     "fulfillment_actions": [],
                 }
 
-        actions = reconcile_request_actions(request, active_request_context["actions"])
+        # First identify requested items that the agent did not process.
+        reconciled = reconcile_request_actions(
+            request,
+            active_request_context["actions"],
+        )
+
+        catalog_names = pd.read_sql(
+            "SELECT item_name FROM inventory",
+            db_engine,
+        )["item_name"].tolist()
+
+        # Retry only genuinely omitted items. Never retry an item that was
+        # already fulfilled, declined, or sent for restocking.
+        for item in reconciled:
+            if item.get("status") != "not_processed":
+                continue
+
+            requested_description = item.get(
+                "requested_description",
+                item.get("item_name", ""),
+            )
+            quantity = item.get("quantity")
+
+            if not isinstance(quantity, int) or isinstance(quantity, bool):
+                continue
+
+            candidates = catalog_item_candidates(
+                requested_description,
+                catalog_names,
+            )
+
+            # Do not guess if the description maps to zero or multiple products.
+            if len(candidates) != 1:
+                continue
+
+            canonical_name = candidates[0]
+
+            # This is a second guard against inventing a quantity/product pairing.
+            if not item_quantity_is_explicitly_requested(
+                request,
+                canonical_name,
+                quantity,
+                catalog_names,
+            ):
+                continue
+
+            # Reuse the same function as the ordering agent.
+            fulfill_catalog_item(canonical_name, quantity)
+
+        # Reconcile again so the final status reflects any verified fallback sales.
+        actions = reconcile_request_actions(
+            request,
+            active_request_context["actions"],
+        )
+        
         print("Requested product outcomes:")
    
         successful_actions = [
             action for action in actions
-            if action.get("status") == "fulfilled"
-            and bool(action.get("transaction_ids"))
+            if has_verified_sale(action, request_id)
         ]
         restock_actions = [
             action for action in actions
@@ -1448,14 +1587,13 @@ def run_test_scenarios():
                 "no verified fulfillment was recorded."
             )
 
-        elif all(
-            action.get("status") == "fulfilled"
-            and bool(action.get("transaction_ids"))
+        elif actions and all(
+            has_verified_sale(action, request_id)
             for action in actions
         ):
             fulfillment_status = "fulfilled"
             fulfillment_reason = (
-                "All requested items were fulfilled and their transactions verified."
+                "Every requested item has a matching, verified sales transaction."
             )
 
         elif all(

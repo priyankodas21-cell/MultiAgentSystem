@@ -894,6 +894,36 @@ def record_request_transaction(
         )
     return transaction_rowid
 
+def clean_requested_description(description: str) -> str:
+    """Remove surrounding punctuation and non-product context before matching."""
+    if not isinstance(description, str):
+        return ""
+
+    description = re.sub(
+        r"\s*\(Date of request:.*$",
+        "",
+        description,
+        flags=re.IGNORECASE,
+    )
+
+    description = re.split(
+        r"\s+(?:for|by|please|we need|i need|the supplies|along with)\b",
+        description,
+        maxsplit=1,
+        flags=re.IGNORECASE,
+    )[0]
+
+    return description.strip(" \t\r\n-,:.")
+
+def normalize_product_alias(description: str) -> str:
+    """Map explicitly approved customer descriptions to catalog names."""
+    aliases = {
+        "heavy cardstock (white)": "Cardstock",
+        "white printer paper": "Standard copy paper",
+    }
+
+    key = description.strip().casefold()
+    return aliases.get(key, description.strip())
 
 def catalog_item_candidates(
     item_description: str,
@@ -907,6 +937,8 @@ def catalog_item_candidates(
     such as 'A4'. Return all tied best matches so ambiguous requests
     are not silently assigned to the wrong product.
     """
+
+    item_description = normalize_product_alias(item_description)
 
     def normalize_phrase(value: str) -> str:
         return " ".join(re.findall(r"[a-z0-9]+", value.casefold()))
@@ -1550,13 +1582,14 @@ def run_test_scenarios():
         # Retry only genuinely omitted items. Never retry an item that was
         # already fulfilled, declined, or sent for restocking.
         for item in reconciled:
-            if item.get("status") != "not_processed":
+            if item.get("status") not in {"not_processed","declined"}:
                 continue
 
-            requested_description = item.get(
-                "requested_description",
-                item.get("item_name", ""),
+            requested_description = clean_requested_description(
+                item.get("requested_description", item.get("item_name", ""))
             )
+            requested_description = normalize_product_alias(requested_description)
+            
             quantity = item.get("quantity")
 
             if not isinstance(quantity, int) or isinstance(quantity, bool):

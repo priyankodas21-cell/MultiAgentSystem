@@ -926,6 +926,10 @@ def catalog_item_candidates(
         "standard printing paper": "Standard copy paper",
         "colorful construction paper": "Construction paper",
         "decorative washi tape": "Decorative adhesive tape (washi tape)",
+        "cardstock": "Cardstock",
+        "colorful cardstock": "Cardstock",
+        "colored paper assorted colors": "Colored paper",
+        "colored paper in assorted colors": "Colored paper"
     }
 
     normalized_description = normalize_phrase(item_description)
@@ -1009,61 +1013,79 @@ def catalog_item_candidates(
     ]
 
 
+
 def item_quantity_is_explicitly_requested(
     request_text: str,
     item_name: str,
     quantity: int,
     catalog_names: List[str],
 ) -> bool:
-    """Check for one unique catalog match in the same source clause as the quantity."""
-    quantity_pattern = re.compile(
+    """Verify that the requested quantity belongs to one unambiguous catalog item."""
+
+    pattern = re.compile(
         r"(?<![\w])(?P<quantity>\d[\d,]*)\s+"
-        r"(?:(?:paper|table)\s+)?"
-        r"(?:napkins?|cups?|plates?|sheets?|reams?|rolls?|packets?|"
-        r"boxes?|packs?|pieces?|units?|cards?|boards?|flyers?|posters?|"
+        r"(?P<unit>table\s+napkins?|paper\s+(?:napkins?|cups?|plates?)|"
+        r"sheets?|reams?|rolls?|packets?|boxes?|packs?|pieces?|units?|"
+        r"cards?|cups?|plates?|napkins?|boards?|flyers?|posters?|"
         r"tickets?|envelopes?|pads?|tags?|streamers?|balloons?)"
-        r"\b\s*(?:of\s+)?",
+        r"\b(?:\s+of\b)?",
         re.IGNORECASE,
     )
-    quantity_matches = list(quantity_pattern.finditer(request_text))
 
-    for index, quantity_match in enumerate(quantity_matches):
-        parsed_quantity = int(
-            quantity_match.group("quantity").replace(",", "")
-        )
+    matches = list(pattern.finditer(request_text))
+
+    measurement_units = {
+        "sheet", "sheets", "ream", "reams", "roll", "rolls",
+        "packet", "packets", "box", "boxes", "pack", "packs",
+        "piece", "pieces", "unit", "units", "card", "cards",
+    }
+
+    for index, match in enumerate(matches):
+        parsed_quantity = int(match.group("quantity").replace(",", ""))
         if parsed_quantity != quantity:
             continue
 
-        clause_end = (
-            quantity_matches[index + 1].start()
-            if index + 1 < len(quantity_matches)
-            else len(request_text)
-        )
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(request_text)
+        clause = request_text[match.start():end]
 
-        # Include the quantity and product words consumed by the regex.
-        clause = request_text[quantity_match.start():clause_end]
+        # Keep the product phrase, but remove the quantity and generic
+        # measurement unit. Product names such as "paper napkins" must stay.
+        unit = match.group("unit").casefold().strip()
+        if unit in measurement_units:
+            clause = re.sub(
+                r"^\s*\d[\d,]*\s+" + re.escape(match.group("unit")) +
+                r"\b(?:\s+of\b)?",
+                "",
+                clause,
+                count=1,
+                flags=re.IGNORECASE,
+            )
+        else:
+            clause = re.sub(
+                r"^\s*\d[\d,]*\s+",
+                "",
+                clause,
+                count=1,
+            )
 
-        for delimiter in ("\n", ";", "!"):
-            clause = clause.split(delimiter, maxsplit=1)[0]
-
+        # Keep only the product phrase, not delivery instructions or event details.
+        clause = re.split(r"\r?\n|;|!", clause, maxsplit=1)[0]
+        clause = re.split(r"(?<=[.?])\s+", clause, maxsplit=1)[0]
         clause = re.split(
-            r"(?<=[.?])\s+",
+            r"\s+(?:for|by|please|we need|i need|the supplies|along with)\b",
             clause,
             maxsplit=1,
+            flags=re.IGNORECASE,
         )[0]
+        clause = clause.strip(" \t\r\n-,:.")
 
-        matching_names = catalog_item_candidates(
-            clause,
-            catalog_names,
-        )
+        candidates = catalog_item_candidates(clause, catalog_names)
 
-        if (
-            len(matching_names) == 1
-            and matching_names[0].casefold() == item_name.casefold()
-        ):
+        if len(candidates) == 1 and candidates[0].casefold() == item_name.casefold():
             return True
 
     return False
+
 
 def fulfill_catalog_item(item_name: str, quantity: int) -> Dict:
     """Validate and process one explicitly requested catalog item exactly once."""

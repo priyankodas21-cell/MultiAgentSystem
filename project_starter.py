@@ -1037,12 +1037,29 @@ def catalog_item_candidates(
         score for _, score in scored_candidates
     )
 
-    # Preserve ties: the caller must reject unresolved ambiguity.
-    return [
+    best_matches = [
         name
         for name, score in scored_candidates
         if abs(score - highest_score) < 1e-9
     ]
+
+    # Tie-break only when a distinctive word matched: prefer the catalog
+    # name with the fewest extra words the customer did not mention
+    # (e.g. "cardstock" -> "Cardstock", not "250 gsm cardstock").
+    if len(best_matches) > 1 and highest_score >= 3.0:
+        def extra_weight(name: str) -> float:
+            extra = tokenize(name.partition("(")[0]) - description_tokens
+            return sum(token_weight(token) for token in extra)
+
+        fewest_extra = min(extra_weight(name) for name in best_matches)
+        best_matches = [
+            name for name in best_matches
+            if abs(extra_weight(name) - fewest_extra) < 1e-9
+        ]
+
+    # Remaining ties are still ambiguous and must be rejected by the caller.
+    return best_matches
+   
 
 
 
@@ -1109,7 +1126,10 @@ def item_quantity_is_explicitly_requested(
             maxsplit=1,
             flags=re.IGNORECASE,
         )[0]
+
         clause = clause.strip(" \t\r\n-,:.")
+        # Drop a trailing list connector such as ", and" so aliases still match.
+        clause = re.sub(r"[,\s-]*\b(?:and|along with)$", "", clause).strip(" \t\r\n-,:.")
 
         candidates = catalog_item_candidates(clause, catalog_names)
 
@@ -1339,7 +1359,10 @@ def reconcile_request_actions(request_text: str, actions: List[Dict]) -> List[Di
         unit = source_match.group("unit")
         if unit.casefold() not in {"sheet", "sheets", "ream", "reams", "roll", "rolls", "packet", "packets", "box", "boxes", "pack", "packs", "piece", "pieces", "unit", "units"}:
             description = f"{unit} {description}".strip()
+        # Clean after the unit is prepended so "for ..." context is removed.
+        description = clean_requested_description(description)
         candidates = catalog_item_candidates(description, names)
+
         matched_actions = [
             (action_index, action) for action_index, action in enumerate(actions)
             if action_index not in used_actions and action.get("quantity") == quantity
@@ -1439,6 +1462,29 @@ def build_multi_agent_system(model_id: str = "gpt-4o-mini"):
             quantity: Positive whole number of units requested.
         """
         return json.dumps(fulfill_catalog_item(item_name, quantity))
+    
+
+    @tool
+    def restock_funding_check(item_name: str, quantity: int) -> str:
+        """Internally check whether restocking an item can be funded.
+
+        Args:
+            item_name: Exact catalog item name.
+            quantity: Positive whole number of units to restock.
+        """
+        request_date = active_request_context["request_date"]
+        if not isinstance(request_date, str):
+            return "Funding cannot be checked because no request date is active."
+        report = get_ordering_financial_status(request_date)
+        item = next(
+            (row for row in report["inventory_summary"] if row["item_name"] == item_name),
+            None,
+        )
+        if item is None:
+            return json.dumps({"item_name": item_name, "fundable": False, "reason": "Not a catalog item."})
+        restock_cost = round(float(item["unit_price"]) * quantity, 2)
+        # Only a yes/no is returned so the internal cash balance is never exposed.
+        return json.dumps({"item_name": item_name, "fundable": restock_cost <= report["cash_balance"]})
 
     inventory_agent = ToolCallingAgent(
         name="inventory_agent",
@@ -1459,10 +1505,10 @@ def build_multi_agent_system(model_id: str = "gpt-4o-mini"):
     ordering_agent = ToolCallingAgent(
         name="ordering_agent",
         description="Validates itemized customer orders against seeded inventory and records only verified sales or funded restocks.",
-        tools=[fulfill_order_item],
+        tools=[fulfill_order_item,restock_funding_check],
         max_tool_threads=1,
         model=model,
-        instructions="Handle fulfillment only. Process each exact requested catalog item once using fulfill_order_item. Do not invent dates, prices, stock, cash balances, or completed transactions. Use the returned status and delivery date as the sole source of fulfillment claims. Never disclose internal cash balances or technical errors.",
+        instructions="Handle fulfillment only. Use restock_funding_check when a restock may be needed. Process each exact requested catalog item once using fulfill_order_item. Do not invent dates, prices, stock, cash balances, or completed transactions. Use the returned status and delivery date as the sole source of fulfillment claims. Never disclose internal cash balances or technical errors.",
         max_steps=6,
     )
 
@@ -1589,7 +1635,7 @@ def run_test_scenarios():
                 item.get("requested_description", item.get("item_name", ""))
             )
             requested_description = normalize_product_alias(requested_description)
-            
+
             quantity = item.get("quantity")
 
             if not isinstance(quantity, int) or isinstance(quantity, bool):
@@ -1694,6 +1740,7 @@ def run_test_scenarios():
                 )
             )
 
+        response = "We could not identify any catalog items in this request."
         if actions:
             response_lines = []
             for action in actions:

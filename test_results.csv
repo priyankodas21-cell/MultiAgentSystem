@@ -1,74 +1,283 @@
 request_id,request_date,cash_balance_before,cash_balance,cash_change,inventory_value,response,fulfillment_status,fulfillment_reason,fulfillment_actions
-1,2025-04-01,42324.22,42389.22,65.0,7610.780000000001,"Fulfilled 200 units of Glossy paper for $40.00 (200 x $0.20 catalog unit price; no discount applied).
-Fulfilled 100 units of Cardstock for $15.00 (100 x $0.15 catalog unit price; no discount applied).
-Fulfilled 100 units of Colored paper for $10.00 (100 x $0.10 catalog unit price; no discount applied).
-Total for recorded sales: $65.00.",fulfilled,"Every requested item has a matching, verified sales transaction.","[{""request_id"": 1, ""item_name"": ""Glossy paper"", ""quantity"": 200, ""unit_price"": 0.2, ""sale_total"": 40.0, ""stock_at_request"": 587, ""status"": ""fulfilled"", ""transaction_ids"": [48], ""requested_description"": ""A4 glossy paper"", ""requested_unit"": ""sheets""}, {""request_id"": 1, ""item_name"": ""Cardstock"", ""quantity"": 100, ""unit_price"": 0.15, ""sale_total"": 15.0, ""stock_at_request"": 595, ""status"": ""fulfilled"", ""transaction_ids"": [49], ""requested_description"": ""heavy cardstock (white)"", ""requested_unit"": ""sheets""}, {""request_id"": 1, ""item_name"": ""Colored paper"", ""quantity"": 100, ""unit_price"": 0.1, ""sale_total"": 10.0, ""stock_at_request"": 788, ""status"": ""fulfilled"", ""transaction_ids"": [50], ""requested_description"": ""colored paper (assorted colors)"", ""requested_unit"": ""sheets""}]"
-2,2025-04-03,42389.22,42404.22,15.0,7595.780000000001,"Supplier restock recorded: 82 units of Poster paper; estimated supplier arrival 2025-04-04. The customer order for 500 units has not yet been fulfilled.
-Fulfilled 300 units of Party streamers for $15.00 (300 x $0.05 catalog unit price; no discount applied).
-Could not fulfill 200 units of balloons: No exact catalog match was found.
-Total for recorded sales: $15.00.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[{""request_id"": 2, ""item_name"": ""Poster paper"", ""quantity"": 500, ""status"": ""restock_ordered"", ""restock_quantity"": 82, ""restock_transaction_id"": 51, ""estimated_delivery_date"": ""2025-04-04"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""colorful poster paper"", ""requested_unit"": ""sheets""}, {""request_id"": 2, ""item_name"": ""Party streamers"", ""quantity"": 300, ""unit_price"": 0.05, ""sale_total"": 15.0, ""stock_at_request"": 707, ""status"": ""fulfilled"", ""transaction_ids"": [52], ""requested_description"": ""streamers"", ""requested_unit"": ""roll""}, {""request_id"": 2, ""item_name"": ""balloons"", ""quantity"": 200, ""status"": ""declined"", ""reason"": ""No exact catalog match was found."", ""requested_description"": ""balloons"", ""requested_unit"": ""balloons""}]"
-3,2025-04-04,42383.72,42383.72,0.0,7616.280000000001,"Supplier restock recorded: 9728 units of A4 paper; estimated supplier arrival 2025-04-11. The customer order for 10000 units has not yet been fulfilled.
-Could not fulfill 5000 units of A3 paper: This requested item was not processed; no sale was verified for it.
-Could not fulfill 500 units of printer paper: This requested item was not processed; no sale was verified for it.",partially_processed,"Some supplier restock orders were recorded, but other requested items could not be fulfilled.","[{""request_id"": 3, ""item_name"": ""A4 paper"", ""quantity"": 10000, ""status"": ""restock_ordered"", ""restock_quantity"": 9728, ""restock_transaction_id"": 53, ""estimated_delivery_date"": ""2025-04-11"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""A4 paper"", ""requested_unit"": ""sheets""}, {""item_name"": ""A3 paper"", ""quantity"": 5000, ""status"": ""not_processed"", ""reason"": ""This requested item was not processed; no sale was verified for it."", ""requested_description"": ""A3 paper"", ""requested_unit"": ""sheets""}, {""item_name"": ""printer paper"", ""quantity"": 500, ""status"": ""not_processed"", ""reason"": ""This requested item was not processed; no sale was verified for it."", ""requested_description"": ""printer paper"", ""requested_unit"": ""reams""}]"
-4,2025-04-05,42383.72,42395.47,11.75,7604.530000000001,"Supplier restock recorded: 5 units of Cardstock; estimated supplier arrival 2025-04-05. The customer order for 500 units has not yet been fulfilled.
-Fulfilled 250 units of A4 paper for $12.50 (250 x $0.05 catalog unit price; no discount applied).
-Total for recorded sales: $12.50.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[{""request_id"": 4, ""item_name"": ""Cardstock"", ""quantity"": 500, ""status"": ""restock_ordered"", ""restock_quantity"": 5, ""restock_transaction_id"": 54, ""estimated_delivery_date"": ""2025-04-05"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""high-quality, recycled cardstock in various colors"", ""requested_unit"": ""sheets""}, {""request_id"": 4, ""item_name"": ""A4 paper"", ""quantity"": 250, ""unit_price"": 0.05, ""sale_total"": 12.5, ""stock_at_request"": 272, ""status"": ""fulfilled"", ""transaction_ids"": [55], ""requested_description"": ""A4 size printer paper"", ""requested_unit"": ""sheets""}]"
-5,2025-04-05,42395.47,42530.47,135.0,7469.530000000001,"Fulfilled 500 units of Colored paper for $50.00 (500 x $0.10 catalog unit price; no discount applied).
-Fulfilled 300 units of Cardstock for $45.00 (300 x $0.15 catalog unit price; no discount applied).
-Fulfilled 200 units of Decorative adhesive tape (washi tape) for $40.00 (200 x $0.20 catalog unit price; no discount applied).
-Total for recorded sales: $135.00.",fulfilled,"Every requested item has a matching, verified sales transaction.","[{""request_id"": 5, ""item_name"": ""Colored paper"", ""quantity"": 500, ""unit_price"": 0.1, ""sale_total"": 50.0, ""stock_at_request"": 688, ""status"": ""fulfilled"", ""transaction_ids"": [56], ""requested_description"": ""8.5\""x11\"" colored paper"", ""requested_unit"": ""sheets""}, {""request_id"": 5, ""item_name"": ""Cardstock"", ""quantity"": 300, ""unit_price"": 0.15, ""sale_total"": 45.0, ""stock_at_request"": 500, ""status"": ""fulfilled"", ""transaction_ids"": [57], ""requested_description"": ""cardstock in various colors"", ""requested_unit"": ""sheets""}, {""request_id"": 5, ""item_name"": ""Decorative adhesive tape (washi tape)"", ""quantity"": 200, ""unit_price"": 0.2, ""sale_total"": 40.0, ""stock_at_request"": 256, ""status"": ""fulfilled"", ""transaction_ids"": [58], ""requested_description"": ""decorative washi tape"", ""requested_unit"": ""rolls""}]"
-6,2025-04-06,42530.47,42607.47,77.0,7392.530000000001,"Fulfilled 500 units of Construction paper for $35.00 (500 x $0.07 catalog unit price; no discount applied).
-Fulfilled 300 units of Standard copy paper for $12.00 (300 x $0.04 catalog unit price; no discount applied).
-Fulfilled 200 units of Cardstock for $30.00 (200 x $0.15 catalog unit price; no discount applied).
-Total for recorded sales: $77.00.",fulfilled,"Every requested item has a matching, verified sales transaction.","[{""request_id"": 6, ""item_name"": ""Construction paper"", ""quantity"": 500, ""unit_price"": 0.07, ""sale_total"": 35.0, ""stock_at_request"": 796, ""status"": ""fulfilled"", ""transaction_ids"": [59], ""requested_description"": ""colorful construction paper"", ""requested_unit"": ""sheets""}, {""request_id"": 6, ""item_name"": ""Standard copy paper"", ""quantity"": 300, ""unit_price"": 0.04, ""sale_total"": 12.0, ""stock_at_request"": 696, ""status"": ""fulfilled"", ""transaction_ids"": [60], ""requested_description"": ""white printer paper"", ""requested_unit"": ""sheets""}, {""request_id"": 6, ""item_name"": ""Cardstock"", ""quantity"": 200, ""unit_price"": 0.15, ""sale_total"": 30.0, ""stock_at_request"": 200, ""status"": ""fulfilled"", ""transaction_ids"": [61], ""requested_description"": ""cardstock in various colors"", ""requested_unit"": ""sheets""}]"
-7,2025-04-07,42607.47,42682.47,75.0,7317.530000000001,"Supplier restock recorded: 113 units of Glossy paper; estimated supplier arrival 2025-04-11. The customer order for 500 units has not yet been fulfilled.
-Supplier restock recorded: 552 units of Matte paper; estimated supplier arrival 2025-04-11. The customer order for 1000 units has not yet been fulfilled.
-Fulfilled 300 units of Poster paper for $75.00 (300 x $0.25 catalog unit price; no discount applied).
-Supplier restock recorded: 200 units of Cardstock; estimated supplier arrival 2025-04-11. The customer order for 200 units has not yet been fulfilled.
-Total for recorded sales: $75.00.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[{""request_id"": 7, ""item_name"": ""Glossy paper"", ""quantity"": 500, ""status"": ""restock_ordered"", ""restock_quantity"": 113, ""restock_transaction_id"": 62, ""estimated_delivery_date"": ""2025-04-11"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""glossy A4 paper"", ""requested_unit"": ""sheets""}, {""request_id"": 7, ""item_name"": ""Matte paper"", ""quantity"": 1000, ""status"": ""restock_ordered"", ""restock_quantity"": 552, ""restock_transaction_id"": 63, ""estimated_delivery_date"": ""2025-04-11"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""matte A3 paper"", ""requested_unit"": ""sheets""}, {""request_id"": 7, ""item_name"": ""Poster paper"", ""quantity"": 300, ""unit_price"": 0.25, ""sale_total"": 75.0, ""stock_at_request"": 500, ""status"": ""fulfilled"", ""transaction_ids"": [64], ""requested_description"": ""poster boards (24\"" x 36\"")"", ""requested_unit"": ""poster""}, {""request_id"": 7, ""item_name"": ""Cardstock"", ""quantity"": 200, ""status"": ""restock_ordered"", ""restock_quantity"": 200, ""restock_transaction_id"": 65, ""estimated_delivery_date"": ""2025-04-11"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""heavyweight cardstock"", ""requested_unit"": ""sheets""}]"
-8,2025-04-07,42682.47,42682.47,0.0,7317.530000000001,"Supplier restock recorded: 113 units of Glossy paper; estimated supplier arrival 2025-04-11. The customer order for 500 units has not yet been fulfilled.
-Supplier restock recorded: 552 units of Matte paper; estimated supplier arrival 2025-04-11. The customer order for 1000 units has not yet been fulfilled.
-Supplier restock recorded: 1812 units of Colored paper; estimated supplier arrival 2025-04-14. The customer order for 2000 units has not yet been fulfilled.
-Supplier restock recorded: 2645 units of Recycled paper; estimated supplier arrival 2025-04-14. The customer order for 3000 units has not yet been fulfilled.",restock_ordered,"Supplier restock orders were recorded, but customer orders have not yet been fulfilled.","[{""request_id"": 8, ""item_name"": ""Glossy paper"", ""quantity"": 500, ""status"": ""restock_ordered"", ""restock_quantity"": 113, ""restock_transaction_id"": 66, ""estimated_delivery_date"": ""2025-04-11"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""A4 glossy paper"", ""requested_unit"": ""sheets""}, {""request_id"": 8, ""item_name"": ""Matte paper"", ""quantity"": 1000, ""status"": ""restock_ordered"", ""restock_quantity"": 552, ""restock_transaction_id"": 67, ""estimated_delivery_date"": ""2025-04-11"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""A4 matte paper"", ""requested_unit"": ""sheets""}, {""request_id"": 8, ""item_name"": ""Colored paper"", ""quantity"": 2000, ""status"": ""restock_ordered"", ""restock_quantity"": 1812, ""restock_transaction_id"": 68, ""estimated_delivery_date"": ""2025-04-14"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""A5 colored paper"", ""requested_unit"": ""sheets""}, {""request_id"": 8, ""item_name"": ""Recycled paper"", ""quantity"": 3000, ""status"": ""restock_ordered"", ""restock_quantity"": 2645, ""restock_transaction_id"": 69, ""estimated_delivery_date"": ""2025-04-14"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""A4 recycled paper"", ""requested_unit"": ""sheets""}]"
-9,2025-04-07,42682.47,42702.47,20.0,7297.530000000001,"Supplier restock recorded: 178 units of A4 paper; estimated supplier arrival 2025-04-11. The customer order for 200 units has not yet been fulfilled.
-Fulfilled 100 units of Glossy paper for $20.00 (100 x $0.20 catalog unit price; no discount applied).
-Could not fulfill 50 units of 100% recycled kraft paper envelopes: This requested item was not processed; no sale was verified for it.
-Total for recorded sales: $20.00.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[{""request_id"": 9, ""item_name"": ""A4 paper"", ""quantity"": 200, ""status"": ""restock_ordered"", ""restock_quantity"": 178, ""restock_transaction_id"": 71, ""estimated_delivery_date"": ""2025-04-11"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""A4 white printer paper"", ""requested_unit"": ""sheets""}, {""request_id"": 9, ""item_name"": ""Glossy paper"", ""quantity"": 100, ""unit_price"": 0.2, ""sale_total"": 20.0, ""stock_at_request"": 387, ""status"": ""fulfilled"", ""transaction_ids"": [70], ""requested_description"": ""A3 glossy paper"", ""requested_unit"": ""sheets""}, {""item_name"": ""100% recycled kraft paper envelopes"", ""quantity"": 50, ""status"": ""not_processed"", ""reason"": ""This requested item was not processed; no sale was verified for it."", ""requested_description"": ""100% recycled kraft paper envelopes"", ""requested_unit"": ""packets""}]"
-13,2025-04-08,42702.47,42702.47,0.0,7297.530000000001,"Supplier restock recorded: 478 units of A4 paper; estimated supplier arrival 2025-04-12. The customer order for 500 units has not yet been fulfilled.
-Supplier restock recorded: 200 units of Cardstock; estimated supplier arrival 2025-04-12. The customer order for 200 units has not yet been fulfilled.",restock_ordered,"Supplier restock orders were recorded, but customer orders have not yet been fulfilled.","[{""request_id"": 13, ""item_name"": ""A4 paper"", ""quantity"": 500, ""status"": ""restock_ordered"", ""restock_quantity"": 478, ""restock_transaction_id"": 72, ""estimated_delivery_date"": ""2025-04-12"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""A4 printing paper"", ""requested_unit"": ""sheets""}, {""request_id"": 13, ""item_name"": ""Cardstock"", ""quantity"": 200, ""status"": ""restock_ordered"", ""restock_quantity"": 200, ""restock_transaction_id"": 73, ""estimated_delivery_date"": ""2025-04-12"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""cardstock"", ""requested_unit"": ""sheets""}]"
-12,2025-04-08,42702.47,42704.47,2.0,7295.530000000001,"Supplier restock recorded: 200 units of Cardstock; estimated supplier arrival 2025-04-12. The customer order for 200 units has not yet been fulfilled.
-Supplier restock recorded: 104 units of Standard copy paper; estimated supplier arrival 2025-04-12. The customer order for 500 units has not yet been fulfilled.
-Fulfilled 100 units of Paper napkins for $2.00 (100 x $0.02 catalog unit price; no discount applied).
-Total for recorded sales: $2.00.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[{""request_id"": 12, ""item_name"": ""Cardstock"", ""quantity"": 200, ""status"": ""restock_ordered"", ""restock_quantity"": 200, ""restock_transaction_id"": 74, ""estimated_delivery_date"": ""2025-04-12"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""colorful cardstock"", ""requested_unit"": ""sheets""}, {""request_id"": 12, ""item_name"": ""Standard copy paper"", ""quantity"": 500, ""status"": ""restock_ordered"", ""restock_quantity"": 104, ""restock_transaction_id"": 75, ""estimated_delivery_date"": ""2025-04-12"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""standard printer paper"", ""requested_unit"": ""sheets""}, {""request_id"": 12, ""item_name"": ""Paper napkins"", ""quantity"": 100, ""unit_price"": 0.02, ""sale_total"": 2.0, ""stock_at_request"": 418, ""status"": ""fulfilled"", ""transaction_ids"": [76], ""requested_description"": ""paper napkins"", ""requested_unit"": ""paper napkins""}]"
-10,2025-04-08,42704.47,42704.47,0.0,7295.530000000001,"Supplier restock recorded: 213 units of Glossy paper; estimated supplier arrival 2025-04-12. The customer order for 500 units has not yet been fulfilled.
-Supplier restock recorded: 300 units of Cardstock; estimated supplier arrival 2025-04-12. The customer order for 300 units has not yet been fulfilled.",restock_ordered,"Supplier restock orders were recorded, but customer orders have not yet been fulfilled.","[{""request_id"": 10, ""item_name"": ""Glossy paper"", ""quantity"": 500, ""status"": ""restock_ordered"", ""restock_quantity"": 213, ""restock_transaction_id"": 77, ""estimated_delivery_date"": ""2025-04-12"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""high-quality glossy paper"", ""requested_unit"": ""sheets""}, {""request_id"": 10, ""item_name"": ""Cardstock"", ""quantity"": 300, ""status"": ""restock_ordered"", ""restock_quantity"": 300, ""restock_transaction_id"": 78, ""estimated_delivery_date"": ""2025-04-12"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""sturdy cardstock"", ""requested_unit"": ""sheets""}]"
-11,2025-04-08,42704.47,42758.47,54.0,7241.530000000001,"Supplier restock recorded: 213 units of Glossy paper; estimated supplier arrival 2025-04-12. The customer order for 500 units has not yet been fulfilled.
-Fulfilled 300 units of Matte paper for $54.00 (300 x $0.18 catalog unit price; no discount applied).
-Total for recorded sales: $54.00.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[{""request_id"": 11, ""item_name"": ""Glossy paper"", ""quantity"": 500, ""status"": ""restock_ordered"", ""restock_quantity"": 213, ""restock_transaction_id"": 79, ""estimated_delivery_date"": ""2025-04-12"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""A3 glossy paper"", ""requested_unit"": ""sheets""}, {""request_id"": 11, ""item_name"": ""Matte paper"", ""quantity"": 300, ""unit_price"": 0.18, ""sale_total"": 54.0, ""stock_at_request"": 448, ""status"": ""fulfilled"", ""transaction_ids"": [80], ""requested_description"": ""A4 matte paper"", ""requested_unit"": ""sheets""}]"
-14,2025-04-09,42758.47,42758.47,0.0,7241.530000000001,"Supplier restock recorded: 4978 units of A4 paper; estimated supplier arrival 2025-04-16. The customer order for 5000 units has not yet been fulfilled.
-Supplier restock recorded: 1800 units of Poster paper; estimated supplier arrival 2025-04-16. The customer order for 2000 units has not yet been fulfilled.
-Supplier restock recorded: 500 units of Cardstock; estimated supplier arrival 2025-04-13. The customer order for 500 units has not yet been fulfilled.",restock_ordered,"Supplier restock orders were recorded, but customer orders have not yet been fulfilled.","[{""request_id"": 14, ""item_name"": ""A4 paper"", ""quantity"": 5000, ""status"": ""restock_ordered"", ""restock_quantity"": 4978, ""restock_transaction_id"": 81, ""estimated_delivery_date"": ""2025-04-16"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""A4 paper"", ""requested_unit"": ""sheets""}, {""request_id"": 14, ""item_name"": ""Poster paper"", ""quantity"": 2000, ""status"": ""restock_ordered"", ""restock_quantity"": 1800, ""restock_transaction_id"": 83, ""estimated_delivery_date"": ""2025-04-16"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""poster paper in various colors"", ""requested_unit"": ""sheets""}, {""request_id"": 14, ""item_name"": ""Cardstock"", ""quantity"": 500, ""status"": ""restock_ordered"", ""restock_quantity"": 500, ""restock_transaction_id"": 82, ""estimated_delivery_date"": ""2025-04-13"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""cardstock"", ""requested_unit"": ""sheets""}]"
-15,2025-04-12,41770.99,42270.99,500.0,7729.009999999999,"Fulfilled 10000 units of A4 paper for $500.00 (10000 x $0.05 catalog unit price; no discount applied).
-Supplier restock recorded: 4812 units of Colored paper; estimated supplier arrival 2025-04-19. The customer order for 5000 units has not yet been fulfilled.
-Could not fulfill 500 units of cardboard: This requested item was not processed; no sale was verified for it.
-Total for recorded sales: $500.00.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[{""request_id"": 15, ""item_name"": ""A4 paper"", ""quantity"": 10000, ""unit_price"": 0.05, ""sale_total"": 500.0, ""stock_at_request"": 10406, ""status"": ""fulfilled"", ""transaction_ids"": [84], ""requested_description"": ""A4 white paper"", ""requested_unit"": ""sheets""}, {""request_id"": 15, ""item_name"": ""Colored paper"", ""quantity"": 5000, ""status"": ""restock_ordered"", ""restock_quantity"": 4812, ""restock_transaction_id"": 85, ""estimated_delivery_date"": ""2025-04-19"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""A3 colored paper (assorted colors)"", ""requested_unit"": ""sheets""}, {""item_name"": ""cardboard"", ""quantity"": 500, ""status"": ""not_processed"", ""reason"": ""This requested item was not processed; no sale was verified for it."", ""requested_description"": ""cardboard"", ""requested_unit"": ""reams""}]"
-16,2025-04-13,42195.99,42234.99,39.0,7765.009999999999,"Supplier restock recorded: 94 units of A4 paper; estimated supplier arrival 2025-04-14. The customer order for 500 units has not yet been fulfilled.
-Fulfilled 200 units of Construction paper for $14.00 (200 x $0.07 catalog unit price; no discount applied).
-Fulfilled 100 units of Poster paper for $25.00 (100 x $0.25 catalog unit price; no discount applied).
-Total for recorded sales: $39.00.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[{""request_id"": 16, ""item_name"": ""A4 paper"", ""quantity"": 500, ""status"": ""restock_ordered"", ""restock_quantity"": 94, ""restock_transaction_id"": 86, ""estimated_delivery_date"": ""2025-04-14"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""A4 printer paper"", ""requested_unit"": ""sheets""}, {""request_id"": 16, ""item_name"": ""Construction paper"", ""quantity"": 200, ""unit_price"": 0.07, ""sale_total"": 14.0, ""stock_at_request"": 296, ""status"": ""fulfilled"", ""transaction_ids"": [87], ""requested_description"": ""colorful construction paper"", ""requested_unit"": ""sheets""}, {""request_id"": 16, ""item_name"": ""Poster paper"", ""quantity"": 100, ""unit_price"": 0.25, ""sale_total"": 25.0, ""stock_at_request"": 200, ""status"": ""fulfilled"", ""transaction_ids"": [88], ""requested_description"": ""poster board"", ""requested_unit"": ""sheets""}]"
-17,2025-04-14,41837.49,41937.49,100.0,8062.509999999999,"Supplier restock recorded: 500 units of A4 paper; estimated supplier arrival 2025-04-18. The customer order for 1000 units has not yet been fulfilled.
-Fulfilled 500 units of Colored paper for $50.00 (500 x $0.10 catalog unit price; no discount applied).
-Supplier restock recorded: 1682 units of Paper napkins; estimated supplier arrival 2025-04-21. The customer order for 2000 units has not yet been fulfilled.
-Supplier restock recorded: 349 units of Paper cups; estimated supplier arrival 2025-04-18. The customer order for 1000 units has not yet been fulfilled.
-Fulfilled 500 units of Paper plates for $50.00 (500 x $0.10 catalog unit price; no discount applied).
-Total for recorded sales: $100.00.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[{""request_id"": 17, ""item_name"": ""A4 paper"", ""quantity"": 1000, ""status"": ""restock_ordered"", ""restock_quantity"": 500, ""restock_transaction_id"": 89, ""estimated_delivery_date"": ""2025-04-18"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""A4 white printer paper"", ""requested_unit"": ""sheets""}, {""request_id"": 17, ""item_name"": ""Colored paper"", ""quantity"": 500, ""unit_price"": 0.1, ""sale_total"": 50.0, ""stock_at_request"": 2000, ""status"": ""fulfilled"", ""transaction_ids"": [90], ""requested_description"": ""A3 colored paper (assorted colors)"", ""requested_unit"": ""sheets""}, {""request_id"": 17, ""item_name"": ""Paper napkins"", ""quantity"": 2000, ""status"": ""restock_ordered"", ""restock_quantity"": 1682, ""restock_transaction_id"": 91, ""estimated_delivery_date"": ""2025-04-21"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""table napkins (white)"", ""requested_unit"": ""table napkins""}, {""request_id"": 17, ""item_name"": ""Paper cups"", ""quantity"": 1000, ""status"": ""restock_ordered"", ""restock_quantity"": 349, ""restock_transaction_id"": 92, ""estimated_delivery_date"": ""2025-04-18"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""paper cups (biodegradable)"", ""requested_unit"": ""paper cups""}, {""request_id"": 17, ""item_name"": ""Paper plates"", ""quantity"": 500, ""unit_price"": 0.1, ""sale_total"": 50.0, ""stock_at_request"": 748, ""status"": ""fulfilled"", ""transaction_ids"": [93], ""requested_description"": ""paper plates (biodegradable)"", ""requested_unit"": ""paper plates""}]"
-18,2025-04-14,41937.49,42032.49,95.0,7967.509999999999,"Fulfilled 500 units of Cardstock for $75.00 (500 x $0.15 catalog unit price; no discount applied).
-Supplier restock recorded: 500 units of Standard copy paper; estimated supplier arrival 2025-04-18. The customer order for 1000 units has not yet been fulfilled.
-Fulfilled 200 units of Colored paper for $20.00 (200 x $0.10 catalog unit price; no discount applied).
-Total for recorded sales: $95.00.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[{""request_id"": 18, ""item_name"": ""Cardstock"", ""quantity"": 500, ""unit_price"": 0.15, ""sale_total"": 75.0, ""stock_at_request"": 1400, ""status"": ""fulfilled"", ""transaction_ids"": [94], ""requested_description"": ""high-quality white cardstock"", ""requested_unit"": ""sheets""}, {""request_id"": 18, ""item_name"": ""Standard copy paper"", ""quantity"": 1000, ""status"": ""restock_ordered"", ""restock_quantity"": 500, ""restock_transaction_id"": 95, ""estimated_delivery_date"": ""2025-04-18"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""standard printing paper"", ""requested_unit"": ""sheets""}, {""request_id"": 18, ""item_name"": ""Colored paper"", ""quantity"": 200, ""unit_price"": 0.1, ""sale_total"": 20.0, ""stock_at_request"": 1500, ""status"": ""fulfilled"", ""transaction_ids"": [96], ""requested_description"": ""colored paper in assorted colors"", ""requested_unit"": ""sheets""}]"
-19,2025-04-15,42032.49,42032.49,0.0,7967.509999999999,"Supplier restock recorded: 1061 units of Glossy paper; estimated supplier arrival 2025-04-22. The customer order for 2000 units has not yet been fulfilled.
-Supplier restock recorded: 248 units of Matte paper; estimated supplier arrival 2025-04-19. The customer order for 1500 units has not yet been fulfilled.
-Supplier restock recorded: 100 units of Cardstock; estimated supplier arrival 2025-04-16. The customer order for 1000 units has not yet been fulfilled.",restock_ordered,"Supplier restock orders were recorded, but customer orders have not yet been fulfilled.","[{""request_id"": 19, ""item_name"": ""Glossy paper"", ""quantity"": 2000, ""status"": ""restock_ordered"", ""restock_quantity"": 1061, ""restock_transaction_id"": 97, ""estimated_delivery_date"": ""2025-04-22"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""A4 glossy paper"", ""requested_unit"": ""sheets""}, {""request_id"": 19, ""item_name"": ""Matte paper"", ""quantity"": 1500, ""status"": ""restock_ordered"", ""restock_quantity"": 248, ""restock_transaction_id"": 98, ""estimated_delivery_date"": ""2025-04-19"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""A3 matte paper"", ""requested_unit"": ""sheets""}, {""request_id"": 19, ""item_name"": ""Cardstock"", ""quantity"": 1000, ""status"": ""restock_ordered"", ""restock_quantity"": 100, ""restock_transaction_id"": 99, ""estimated_delivery_date"": ""2025-04-16"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""cardstock in assorted colors"", ""requested_unit"": ""sheets""}]"
-20,2025-04-17,41318.59,41318.59,0.0,8681.409999999998,"Supplier restock recorded: 4508 units of Flyers; estimated supplier arrival 2025-04-24. The customer order for 5000 units has not yet been fulfilled.
-Could not fulfill 2000 units of posters: This requested item was not processed; no sale was verified for it.
-Could not fulfill 10000 units of tickets: This requested item was not processed; no sale was verified for it.",partially_processed,"Some supplier restock orders were recorded, but other requested items could not be fulfilled.","[{""request_id"": 20, ""item_name"": ""Flyers"", ""quantity"": 5000, ""status"": ""restock_ordered"", ""restock_quantity"": 4508, ""restock_transaction_id"": 100, ""estimated_delivery_date"": ""2025-04-24"", ""reason"": ""A supplier restock was recorded. The customer order is not yet fulfilled."", ""requested_description"": ""flyers"", ""requested_unit"": ""flyers""}, {""item_name"": ""posters"", ""quantity"": 2000, ""status"": ""not_processed"", ""reason"": ""This requested item was not processed; no sale was verified for it."", ""requested_description"": ""posters"", ""requested_unit"": ""posters""}, {""item_name"": ""tickets"", ""quantity"": 10000, ""status"": ""not_processed"", ""reason"": ""This requested item was not processed; no sale was verified for it."", ""requested_description"": ""tickets"", ""requested_unit"": ""tickets""}]"
+1,2025-04-01,42324.22,42389.22,65.0,7610.780000000001,"Thank you for your order (request #1, received April 1, 2025). Here is the status of each item you requested:
+
+Confirmed and fulfilled:
+- 200 sheets of Glossy paper: $40.00 [FULFILLED]
+- 100 sheets of Cardstock: $15.00 [FULFILLED]
+- 100 sheets of Colored paper: $10.00 [FULFILLED]
+
+How we calculated this:
+- Each item's price is the catalog unit price x quantity (for example, 200 x $0.20 = $40.00).
+- Standard catalog prices were used; no bulk discount was applied.
+- No taxes or shipping fees were added.
+- Total charged: $65.00, for confirmed items only. Items waiting for stock or not fulfilled were not charged.",fulfilled,"Every requested item has a matching, verified sales transaction.","[FULFILLED] 200 sheets of Glossy paper - $40.00
+[FULFILLED] 100 sheets of Cardstock - $15.00
+[FULFILLED] 100 sheets of Colored paper - $10.00"
+2,2025-04-03,42389.22,42404.22,15.0,7595.780000000001,"Thank you for your order (request #2, received April 3, 2025). Here is the status of each item you requested:
+
+Confirmed and fulfilled:
+- 300 roll of Party streamers: $15.00 [FULFILLED]
+
+Waiting for new stock:
+- 500 sheets of Poster paper [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 4, 2025. Next step: We will complete this part of your order once the new stock arrives.
+
+Could not be fulfilled:
+- 200 x balloons [ITEM_NOT_IN_CATALOG]: We could not find a product in our catalog that matches this description. You have not been charged for this item. Next step: Please check the product name or choose a similar item from our catalog.
+
+How we calculated this:
+- Each item's price is the catalog unit price x quantity (for example, 300 x $0.05 = $15.00).
+- Standard catalog prices were used; no bulk discount was applied.
+- No taxes or shipping fees were added.
+- Total charged: $15.00, for confirmed items only. Items waiting for stock or not fulfilled were not charged.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[BACKORDERED] 500 sheets of Poster paper - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 4, 2025.
+[FULFILLED] 300 roll of Party streamers - $15.00
+[ITEM_NOT_IN_CATALOG] 200 x balloons - We could not find a product in our catalog that matches this description. You have not been charged for this item."
+3,2025-04-04,42383.72,42383.72,0.0,7616.280000000001,"Thank you for your order (request #3, received April 4, 2025). Here is the status of each item you requested:
+
+Waiting for new stock:
+- 10,000 sheets of A4 paper [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 11, 2025. Next step: We will complete this part of your order once the new stock arrives.
+
+Could not be fulfilled:
+- 5,000 sheets of A3 paper [ITEM_DESCRIPTION_AMBIGUOUS]: This description matches more than one product in our catalog, so we did not want to guess. You have not been charged for this item. Next step: Please tell us the exact product name you would like.
+- 500 reams of printer paper [ITEM_DESCRIPTION_AMBIGUOUS]: This description matches more than one product in our catalog, so we did not want to guess. You have not been charged for this item. Next step: Please tell us the exact product name you would like.
+
+You have not been charged, because no items could be fulfilled at this time.",partially_processed,"Some supplier restock orders were recorded, but other requested items could not be fulfilled.","[BACKORDERED] 10,000 sheets of A4 paper - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 11, 2025.
+[ITEM_DESCRIPTION_AMBIGUOUS] 5,000 sheets of A3 paper - This description matches more than one product in our catalog, so we did not want to guess. You have not been charged for this item.
+[ITEM_DESCRIPTION_AMBIGUOUS] 500 reams of printer paper - This description matches more than one product in our catalog, so we did not want to guess. You have not been charged for this item."
+4,2025-04-05,42383.72,42395.47,11.75,7604.530000000001,"Thank you for your order (request #4, received April 5, 2025). Here is the status of each item you requested:
+
+Confirmed and fulfilled:
+- 250 sheets of A4 paper: $12.50 [FULFILLED]
+
+Waiting for new stock:
+- 500 sheets of Cardstock [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 5, 2025. Next step: We will complete this part of your order once the new stock arrives.
+
+How we calculated this:
+- Each item's price is the catalog unit price x quantity (for example, 250 x $0.05 = $12.50).
+- Standard catalog prices were used; no bulk discount was applied.
+- No taxes or shipping fees were added.
+- Total charged: $12.50, for confirmed items only. Items waiting for stock or not fulfilled were not charged.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[BACKORDERED] 500 sheets of Cardstock - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 5, 2025.
+[FULFILLED] 250 sheets of A4 paper - $12.50"
+5,2025-04-05,42395.47,42530.47,135.0,7469.530000000001,"Thank you for your order (request #5, received April 5, 2025). Here is the status of each item you requested:
+
+Confirmed and fulfilled:
+- 500 sheets of Colored paper: $50.00 [FULFILLED]
+- 300 sheets of Cardstock: $45.00 [FULFILLED]
+- 200 rolls of Decorative adhesive tape (washi tape): $40.00 [FULFILLED]
+
+How we calculated this:
+- Each item's price is the catalog unit price x quantity (for example, 500 x $0.10 = $50.00).
+- Standard catalog prices were used; no bulk discount was applied.
+- No taxes or shipping fees were added.
+- Total charged: $135.00, for confirmed items only. Items waiting for stock or not fulfilled were not charged.",fulfilled,"Every requested item has a matching, verified sales transaction.","[FULFILLED] 500 sheets of Colored paper - $50.00
+[FULFILLED] 300 sheets of Cardstock - $45.00
+[FULFILLED] 200 rolls of Decorative adhesive tape (washi tape) - $40.00"
+6,2025-04-06,42530.47,42607.47,77.0,7392.530000000001,"Thank you for your order (request #6, received April 6, 2025). Here is the status of each item you requested:
+
+Confirmed and fulfilled:
+- 500 sheets of Construction paper: $35.00 [FULFILLED]
+- 300 sheets of Standard copy paper: $12.00 [FULFILLED]
+- 200 sheets of Cardstock: $30.00 [FULFILLED]
+
+How we calculated this:
+- Each item's price is the catalog unit price x quantity (for example, 500 x $0.07 = $35.00).
+- Standard catalog prices were used; no bulk discount was applied.
+- No taxes or shipping fees were added.
+- Total charged: $77.00, for confirmed items only. Items waiting for stock or not fulfilled were not charged.",fulfilled,"Every requested item has a matching, verified sales transaction.","[FULFILLED] 500 sheets of Construction paper - $35.00
+[FULFILLED] 300 sheets of Standard copy paper - $12.00
+[FULFILLED] 200 sheets of Cardstock - $30.00"
+7,2025-04-07,42607.47,42682.47,75.0,7317.530000000001,"Thank you for your order (request #7, received April 7, 2025). Here is the status of each item you requested:
+
+Confirmed and fulfilled:
+- 300 x Poster paper: $75.00 [FULFILLED]
+
+Waiting for new stock:
+- 500 sheets of Glossy paper [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 11, 2025. Next step: We will complete this part of your order once the new stock arrives.
+- 1,000 sheets of Matte paper [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 11, 2025. Next step: We will complete this part of your order once the new stock arrives.
+- 200 sheets of Cardstock [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 11, 2025. Next step: We will complete this part of your order once the new stock arrives.
+
+How we calculated this:
+- Each item's price is the catalog unit price x quantity (for example, 300 x $0.25 = $75.00).
+- Standard catalog prices were used; no bulk discount was applied.
+- No taxes or shipping fees were added.
+- Total charged: $75.00, for confirmed items only. Items waiting for stock or not fulfilled were not charged.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[BACKORDERED] 500 sheets of Glossy paper - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 11, 2025.
+[BACKORDERED] 1,000 sheets of Matte paper - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 11, 2025.
+[FULFILLED] 300 x Poster paper - $75.00
+[BACKORDERED] 200 sheets of Cardstock - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 11, 2025."
+8,2025-04-07,42682.47,42682.47,0.0,7317.530000000001,"Thank you for your order (request #8, received April 7, 2025). Here is the status of each item you requested:
+
+Waiting for new stock:
+- 500 sheets of Glossy paper [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 11, 2025. Next step: We will complete this part of your order once the new stock arrives.
+- 1,000 sheets of Matte paper [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 11, 2025. Next step: We will complete this part of your order once the new stock arrives.
+- 2,000 sheets of Colored paper [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 14, 2025. Next step: We will complete this part of your order once the new stock arrives.
+- 3,000 sheets of Recycled paper [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 14, 2025. Next step: We will complete this part of your order once the new stock arrives.
+
+You have not been charged, because no items could be fulfilled at this time.",restock_ordered,"Supplier restock orders were recorded, but customer orders have not yet been fulfilled.","[BACKORDERED] 500 sheets of Glossy paper - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 11, 2025.
+[BACKORDERED] 1,000 sheets of Matte paper - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 11, 2025.
+[BACKORDERED] 2,000 sheets of Colored paper - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 14, 2025.
+[BACKORDERED] 3,000 sheets of Recycled paper - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 14, 2025."
+9,2025-04-07,42682.47,42702.47,20.0,7297.530000000001,"Thank you for your order (request #9, received April 7, 2025). Here is the status of each item you requested:
+
+Confirmed and fulfilled:
+- 100 sheets of Glossy paper: $20.00 [FULFILLED]
+
+Waiting for new stock:
+- 200 sheets of A4 paper [DELIVERY_WINDOW_UNAVAILABLE]: We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 11, 2025. Your requested delivery date: April 10, 2025. Next step: Please let us know if a later delivery works for you, or consider a smaller quantity or a different paper type.
+
+Could not be fulfilled:
+- 50 packets of 100% recycled kraft paper envelopes [ITEM_DESCRIPTION_AMBIGUOUS]: This description matches more than one product in our catalog, so we did not want to guess. You have not been charged for this item. Next step: Please tell us the exact product name you would like.
+
+How we calculated this:
+- Each item's price is the catalog unit price x quantity (for example, 100 x $0.20 = $20.00).
+- Standard catalog prices were used; no bulk discount was applied.
+- No taxes or shipping fees were added.
+- Total charged: $20.00, for confirmed items only. Items waiting for stock or not fulfilled were not charged.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[DELIVERY_WINDOW_UNAVAILABLE] 200 sheets of A4 paper - We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 11, 2025. Your requested delivery date: April 10, 2025.
+[FULFILLED] 100 sheets of Glossy paper - $20.00
+[ITEM_DESCRIPTION_AMBIGUOUS] 50 packets of 100% recycled kraft paper envelopes - This description matches more than one product in our catalog, so we did not want to guess. You have not been charged for this item."
+13,2025-04-08,42702.47,42702.47,0.0,7297.530000000001,"Thank you for your order (request #13, received April 8, 2025). Here is the status of each item you requested:
+
+Waiting for new stock:
+- 500 sheets of A4 paper [DELIVERY_WINDOW_UNAVAILABLE]: We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 12, 2025. Your requested delivery date: April 10, 2025. Next step: Please let us know if a later delivery works for you, or consider a smaller quantity or a different paper type.
+- 200 sheets of Cardstock [DELIVERY_WINDOW_UNAVAILABLE]: We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 12, 2025. Your requested delivery date: April 10, 2025. Next step: Please let us know if a later delivery works for you, or consider a smaller quantity or a different paper type.
+
+You have not been charged, because no items could be fulfilled at this time.",restock_ordered,"Supplier restock orders were recorded, but customer orders have not yet been fulfilled.","[DELIVERY_WINDOW_UNAVAILABLE] 500 sheets of A4 paper - We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 12, 2025. Your requested delivery date: April 10, 2025.
+[DELIVERY_WINDOW_UNAVAILABLE] 200 sheets of Cardstock - We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 12, 2025. Your requested delivery date: April 10, 2025."
+12,2025-04-08,42702.47,42704.47,2.0,7295.530000000001,"Thank you for your order (request #12, received April 8, 2025). Here is the status of each item you requested:
+
+Confirmed and fulfilled:
+- 100 x Paper napkins: $2.00 [FULFILLED]
+
+Waiting for new stock:
+- 200 sheets of Cardstock [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 12, 2025. Next step: We will complete this part of your order once the new stock arrives.
+- 500 sheets of Standard copy paper [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 12, 2025. Next step: We will complete this part of your order once the new stock arrives.
+
+How we calculated this:
+- Each item's price is the catalog unit price x quantity (for example, 100 x $0.02 = $2.00).
+- Standard catalog prices were used; no bulk discount was applied.
+- No taxes or shipping fees were added.
+- Total charged: $2.00, for confirmed items only. Items waiting for stock or not fulfilled were not charged.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[BACKORDERED] 200 sheets of Cardstock - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 12, 2025.
+[BACKORDERED] 500 sheets of Standard copy paper - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 12, 2025.
+[FULFILLED] 100 x Paper napkins - $2.00"
+10,2025-04-08,42704.47,42704.47,0.0,7295.530000000001,"Thank you for your order (request #10, received April 8, 2025). Here is the status of each item you requested:
+
+Waiting for new stock:
+- 500 sheets of Glossy paper [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 12, 2025. Next step: We will complete this part of your order once the new stock arrives.
+- 300 sheets of Cardstock [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 12, 2025. Next step: We will complete this part of your order once the new stock arrives.
+
+You have not been charged, because no items could be fulfilled at this time.",restock_ordered,"Supplier restock orders were recorded, but customer orders have not yet been fulfilled.","[BACKORDERED] 500 sheets of Glossy paper - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 12, 2025.
+[BACKORDERED] 300 sheets of Cardstock - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 12, 2025."
+11,2025-04-08,42704.47,42758.47,54.0,7241.530000000001,"Thank you for your order (request #11, received April 8, 2025). Here is the status of each item you requested:
+
+Confirmed and fulfilled:
+- 300 sheets of Matte paper: $54.00 [FULFILLED]
+
+Waiting for new stock:
+- 500 sheets of Glossy paper [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 12, 2025. Next step: We will complete this part of your order once the new stock arrives.
+
+How we calculated this:
+- Each item's price is the catalog unit price x quantity (for example, 300 x $0.18 = $54.00).
+- Standard catalog prices were used; no bulk discount was applied.
+- No taxes or shipping fees were added.
+- Total charged: $54.00, for confirmed items only. Items waiting for stock or not fulfilled were not charged.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[BACKORDERED] 500 sheets of Glossy paper - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 12, 2025.
+[FULFILLED] 300 sheets of Matte paper - $54.00"
+14,2025-04-09,42758.47,42758.47,0.0,7241.530000000001,"Thank you for your order (request #14, received April 9, 2025). Here is the status of each item you requested:
+
+Waiting for new stock:
+- 5,000 sheets of A4 paper [DELIVERY_WINDOW_UNAVAILABLE]: We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 16, 2025. Your requested delivery date: April 15, 2025. Next step: Please let us know if a later delivery works for you, or consider a smaller quantity or a different paper type.
+- 2,000 sheets of Poster paper [DELIVERY_WINDOW_UNAVAILABLE]: We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 16, 2025. Your requested delivery date: April 15, 2025. Next step: Please let us know if a later delivery works for you, or consider a smaller quantity or a different paper type.
+- 500 sheets of Cardstock [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 13, 2025. Next step: We will complete this part of your order once the new stock arrives.
+
+You have not been charged, because no items could be fulfilled at this time.",restock_ordered,"Supplier restock orders were recorded, but customer orders have not yet been fulfilled.","[DELIVERY_WINDOW_UNAVAILABLE] 5,000 sheets of A4 paper - We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 16, 2025. Your requested delivery date: April 15, 2025.
+[DELIVERY_WINDOW_UNAVAILABLE] 2,000 sheets of Poster paper - We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 16, 2025. Your requested delivery date: April 15, 2025.
+[BACKORDERED] 500 sheets of Cardstock - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 13, 2025."
+15,2025-04-12,41770.99,42270.99,500.0,7729.009999999999,"Thank you for your order (request #15, received April 12, 2025). Here is the status of each item you requested:
+
+Confirmed and fulfilled:
+- 10,000 sheets of A4 paper: $500.00 [FULFILLED]
+
+Waiting for new stock:
+- 5,000 sheets of Colored paper [DELIVERY_WINDOW_UNAVAILABLE]: We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 19, 2025. Your requested delivery date: April 15, 2025. Next step: Please let us know if a later delivery works for you, or consider a smaller quantity or a different paper type.
+
+Could not be fulfilled:
+- 500 reams of cardboard [ITEM_NOT_IN_CATALOG]: We could not find a product in our catalog that matches this description. You have not been charged for this item. Next step: Please check the product name or choose a similar item from our catalog.
+
+How we calculated this:
+- Each item's price is the catalog unit price x quantity (for example, 10,000 x $0.05 = $500.00).
+- Standard catalog prices were used; no bulk discount was applied.
+- No taxes or shipping fees were added.
+- Total charged: $500.00, for confirmed items only. Items waiting for stock or not fulfilled were not charged.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[FULFILLED] 10,000 sheets of A4 paper - $500.00
+[DELIVERY_WINDOW_UNAVAILABLE] 5,000 sheets of Colored paper - We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 19, 2025. Your requested delivery date: April 15, 2025.
+[ITEM_NOT_IN_CATALOG] 500 reams of cardboard - We could not find a product in our catalog that matches this description. You have not been charged for this item."
+16,2025-04-13,42195.99,42234.99,39.0,7765.009999999999,"Thank you for your order (request #16, received April 13, 2025). Here is the status of each item you requested:
+
+Confirmed and fulfilled:
+- 200 sheets of Construction paper: $14.00 [FULFILLED]
+- 100 sheets of Poster paper: $25.00 [FULFILLED]
+
+Waiting for new stock:
+- 500 sheets of A4 paper [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 14, 2025. Next step: We will complete this part of your order once the new stock arrives.
+
+How we calculated this:
+- Each item's price is the catalog unit price x quantity (for example, 200 x $0.07 = $14.00).
+- Standard catalog prices were used; no bulk discount was applied.
+- No taxes or shipping fees were added.
+- Total charged: $39.00, for confirmed items only. Items waiting for stock or not fulfilled were not charged.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[BACKORDERED] 500 sheets of A4 paper - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 14, 2025.
+[FULFILLED] 200 sheets of Construction paper - $14.00
+[FULFILLED] 100 sheets of Poster paper - $25.00"
+17,2025-04-14,41837.49,41937.49,100.0,8062.509999999999,"Thank you for your order (request #17, received April 14, 2025). Here is the status of each item you requested:
+
+Confirmed and fulfilled:
+- 500 sheets of Colored paper: $50.00 [FULFILLED]
+- 500 x Paper plates: $50.00 [FULFILLED]
+
+Waiting for new stock:
+- 1,000 sheets of A4 paper [DELIVERY_WINDOW_UNAVAILABLE]: We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 18, 2025. Your requested delivery date: April 15, 2025. Next step: Please let us know if a later delivery works for you, or consider a smaller quantity or a different paper type.
+- 2,000 x Paper napkins [DELIVERY_WINDOW_UNAVAILABLE]: We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 21, 2025. Your requested delivery date: April 15, 2025. Next step: Please let us know if a later delivery works for you, or consider a smaller quantity or a different paper type.
+- 1,000 x Paper cups [DELIVERY_WINDOW_UNAVAILABLE]: We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 18, 2025. Your requested delivery date: April 15, 2025. Next step: Please let us know if a later delivery works for you, or consider a smaller quantity or a different paper type.
+
+How we calculated this:
+- Each item's price is the catalog unit price x quantity (for example, 500 x $0.10 = $50.00).
+- Standard catalog prices were used; no bulk discount was applied.
+- No taxes or shipping fees were added.
+- Total charged: $100.00, for confirmed items only. Items waiting for stock or not fulfilled were not charged.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[DELIVERY_WINDOW_UNAVAILABLE] 1,000 sheets of A4 paper - We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 18, 2025. Your requested delivery date: April 15, 2025.
+[FULFILLED] 500 sheets of Colored paper - $50.00
+[DELIVERY_WINDOW_UNAVAILABLE] 2,000 x Paper napkins - We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 21, 2025. Your requested delivery date: April 15, 2025.
+[DELIVERY_WINDOW_UNAVAILABLE] 1,000 x Paper cups - We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 18, 2025. Your requested delivery date: April 15, 2025.
+[FULFILLED] 500 x Paper plates - $50.00"
+18,2025-04-14,41937.49,42032.49,95.0,7967.509999999999,"Thank you for your order (request #18, received April 14, 2025). Here is the status of each item you requested:
+
+Confirmed and fulfilled:
+- 500 sheets of Cardstock: $75.00 [FULFILLED]
+- 200 sheets of Colored paper: $20.00 [FULFILLED]
+
+Waiting for new stock:
+- 1,000 sheets of Standard copy paper [DELIVERY_WINDOW_UNAVAILABLE]: We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 18, 2025. Your requested delivery date: April 15, 2025. Next step: Please let us know if a later delivery works for you, or consider a smaller quantity or a different paper type.
+
+How we calculated this:
+- Each item's price is the catalog unit price x quantity (for example, 500 x $0.15 = $75.00).
+- Standard catalog prices were used; no bulk discount was applied.
+- No taxes or shipping fees were added.
+- Total charged: $95.00, for confirmed items only. Items waiting for stock or not fulfilled were not charged.",partially_fulfilled,"Some requested items were fulfilled, while other items remain pending restocking or could not be fulfilled.","[FULFILLED] 500 sheets of Cardstock - $75.00
+[DELIVERY_WINDOW_UNAVAILABLE] 1,000 sheets of Standard copy paper - We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 18, 2025. Your requested delivery date: April 15, 2025.
+[FULFILLED] 200 sheets of Colored paper - $20.00"
+19,2025-04-15,42032.49,42032.49,0.0,7967.509999999999,"Thank you for your order (request #19, received April 15, 2025). Here is the status of each item you requested:
+
+Waiting for new stock:
+- 2,000 sheets of Glossy paper [DELIVERY_WINDOW_UNAVAILABLE]: We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 22, 2025. Your requested delivery date: April 20, 2025. Next step: Please let us know if a later delivery works for you, or consider a smaller quantity or a different paper type.
+- 1,500 sheets of Matte paper [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 19, 2025. Next step: We will complete this part of your order once the new stock arrives.
+- 1,000 sheets of Cardstock [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 16, 2025. Next step: We will complete this part of your order once the new stock arrives.
+
+You have not been charged, because no items could be fulfilled at this time.",restock_ordered,"Supplier restock orders were recorded, but customer orders have not yet been fulfilled.","[DELIVERY_WINDOW_UNAVAILABLE] 2,000 sheets of Glossy paper - We don't have enough in stock, and our supplier's expected arrival date is later than the delivery date you asked for. You have not been charged for this item. Expected supplier arrival: April 22, 2025. Your requested delivery date: April 20, 2025.
+[BACKORDERED] 1,500 sheets of Matte paper - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 19, 2025.
+[BACKORDERED] 1,000 sheets of Cardstock - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 16, 2025."
+20,2025-04-17,41318.59,41318.59,0.0,8681.409999999998,"Thank you for your order (request #20, received April 17, 2025). Here is the status of each item you requested:
+
+Waiting for new stock:
+- 5,000 x Flyers [BACKORDERED]: We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 24, 2025. Next step: We will complete this part of your order once the new stock arrives.
+
+Could not be fulfilled:
+- 2,000 x posters [ITEM_NOT_IN_CATALOG]: We could not find a product in our catalog that matches this description. You have not been charged for this item. Next step: Please check the product name or choose a similar item from our catalog.
+- 10,000 x tickets [ITEM_NOT_IN_CATALOG]: We could not find a product in our catalog that matches this description. You have not been charged for this item. Next step: Please check the product name or choose a similar item from our catalog.
+
+You have not been charged, because no items could be fulfilled at this time.",partially_processed,"Some supplier restock orders were recorded, but other requested items could not be fulfilled.","[BACKORDERED] 5,000 x Flyers - We don't have enough in stock right now, so we have ordered more from our supplier. You have not been charged for this item yet. Expected supplier arrival: April 24, 2025.
+[ITEM_NOT_IN_CATALOG] 2,000 x posters - We could not find a product in our catalog that matches this description. You have not been charged for this item.
+[ITEM_NOT_IN_CATALOG] 10,000 x tickets - We could not find a product in our catalog that matches this description. You have not been charged for this item."

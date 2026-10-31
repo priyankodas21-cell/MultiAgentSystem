@@ -1555,6 +1555,317 @@ def has_verified_sale(action: Dict, request_id: int) -> bool:
 
     return True
 
+
+
+# ---------------------------------------------------------------------------
+# Customer-facing response layer
+# Converts internal action records into plain-English customer messages with
+# standardized reason codes, a short "How we calculated this" section, PII
+# masking, and safe (non-technical) error messages. It only reads the action
+# records produced above; it never changes inventory, cash, or transactions.
+# ---------------------------------------------------------------------------
+
+# Standard reason codes paired with a customer-friendly explanation and next step.
+CUSTOMER_REASON_CODES = {
+    "FULFILLED": (
+        "Your item is confirmed and has been fulfilled.",
+        "",
+    ),
+    "BACKORDERED": (
+        "We don't have enough in stock right now, so we have ordered more "
+        "from our supplier. You have not been charged for this item yet.",
+        "We will complete this part of your order once the new stock arrives.",
+    ),
+    "DELIVERY_WINDOW_UNAVAILABLE": (
+        "We don't have enough in stock, and our supplier's expected arrival "
+        "date is later than the delivery date you asked for. You have not "
+        "been charged for this item.",
+        "Please let us know if a later delivery works for you, or consider "
+        "a smaller quantity or a different paper type.",
+    ),
+    "OUT_OF_STOCK": (
+        "We don't have enough of this item in stock and cannot restock it "
+        "in time. You have not been charged for this item.",
+        "Please try a smaller quantity or choose a different paper type.",
+    ),
+    "ITEM_NOT_IN_CATALOG": (
+        "We could not find a product in our catalog that matches this "
+        "description. You have not been charged for this item.",
+        "Please check the product name or choose a similar item from our catalog.",
+    ),
+    "ITEM_DESCRIPTION_AMBIGUOUS": (
+        "This description matches more than one product in our catalog, "
+        "so we did not want to guess. You have not been charged for this item.",
+        "Please tell us the exact product name you would like.",
+    ),
+    "QUANTITY_UNCLEAR": (
+        "We could not clearly confirm the quantity for this item from your "
+        "request. You have not been charged for this item.",
+        "Please resend this item with the exact product name and quantity.",
+    ),
+    "INVALID_QUANTITY": (
+        "The quantity for this item must be a positive whole number. "
+        "You have not been charged for this item.",
+        "Please resend this item with a valid quantity.",
+    ),
+    "ITEM_NOT_PROCESSED": (
+        "We could not confirm this item and quantity from your request, so "
+        "it was not ordered. You have not been charged for this item.",
+        "Please resend this item with the exact product name and quantity.",
+    ),
+    "PROCESSING_ERROR": (
+        "We ran into a problem while processing this item, so it was not "
+        "ordered. You have not been charged for this item.",
+        "Please try again shortly, or contact us if the problem continues.",
+    ),
+}
+
+# Customer-safe message used whenever something unexpected goes wrong.
+CUSTOMER_SAFE_ERROR_MESSAGE = (
+    "We're sorry, but we couldn't process your order right now because of a "
+    "temporary problem on our side. You have not been charged.\n"
+    "Next step: Please try again shortly. If the problem continues, please "
+    "contact our support team with your request number."
+)
+
+_SIMPLE_UNITS = {
+    "sheet", "sheets", "ream", "reams", "roll", "rolls", "packet", "packets",
+    "box", "boxes", "pack", "packs", "piece", "pieces",
+}
+
+
+def mask_pii(text: str) -> str:
+    """Mask email addresses and phone numbers before showing text to a customer."""
+    if not isinstance(text, str):
+        return ""
+
+    def mask_email(match: re.Match) -> str:
+        local, domain = match.group(1), match.group(2)
+        return f"{local[0]}***@{domain}"
+
+    text = re.sub(
+        r"\b([A-Za-z0-9._%+-]+)@([A-Za-z0-9.-]+\.[A-Za-z]{2,})\b",
+        mask_email,
+        text,
+    )
+
+    def mask_phone(match: re.Match) -> str:
+        digits = re.sub(r"\D", "", match.group(0))
+        return f"***-***-{digits[-4:]}"
+
+    text = re.sub(
+        r"(?<!\w)(?:\+?\d{1,3}[\s.-]?)?(?:\(\d{3}\)|\d{3})[\s.-]?\d{3}[\s.-]?\d{4}(?!\w)",
+        mask_phone,
+        text,
+    )
+    return text
+
+
+def _format_customer_date(date_value: str) -> str:
+    """Convert YYYY-MM-DD into a readable date such as April 11, 2025."""
+    try:
+        parsed = datetime.strptime(str(date_value)[:10], "%Y-%m-%d")
+        return f"{parsed.strftime('%B')} {parsed.day}, {parsed.year}"
+    except (TypeError, ValueError):
+        return str(date_value)
+
+
+def _requested_delivery_deadline(request_text: str) -> Union[datetime, None]:
+    """Return the 'deliver by <Month D, YYYY>' date stated in the request, if any."""
+    match = re.search(
+        r"\bby\s+([A-Z][a-z]+\s+\d{1,2},\s*\d{4})",
+        request_text or "",
+    )
+    if not match:
+        return None
+    try:
+        return datetime.strptime(
+            re.sub(r",\s*", ", ", match.group(1)), "%B %d, %Y"
+        )
+    except ValueError:
+        return None
+
+
+def _describe_item(action: Dict) -> str:
+    """Readable item label, e.g. '200 sheets of Glossy paper'."""
+    quantity = action.get("quantity")
+    quantity_text = f"{quantity:,}" if isinstance(quantity, int) else str(quantity)
+    item_name = mask_pii(str(action.get("item_name", "item")))
+    unit = str(action.get("requested_unit", "")).strip()
+
+    if unit.casefold() in _SIMPLE_UNITS:
+        return f"{quantity_text} {unit} of {item_name}"
+    return f"{quantity_text} x {item_name}"
+
+
+def customer_reason_code(
+    action: Dict,
+    request_id: int,
+    delivery_deadline: Union[datetime, None],
+    catalog_names: List[str],
+) -> str:
+    """Map an internal action outcome to a standardized customer reason code."""
+    status = action.get("status")
+    reason = str(action.get("reason", "")).casefold()
+
+    if status == "fulfilled" and has_verified_sale(action, request_id):
+        return "FULFILLED"
+
+    if status == "restock_ordered":
+        try:
+            arrival = datetime.strptime(
+                str(action.get("estimated_delivery_date"))[:10], "%Y-%m-%d"
+            )
+            if delivery_deadline is not None and arrival > delivery_deadline:
+                return "DELIVERY_WINDOW_UNAVAILABLE"
+        except ValueError:
+            pass
+        return "BACKORDERED"
+
+    if status == "not_processed":
+        # Use the same matching rules as the fallback retry to explain why.
+        description = normalize_product_alias(
+            clean_requested_description(
+                action.get("requested_description", action.get("item_name", ""))
+            )
+        )
+        candidates = catalog_item_candidates(description, catalog_names)
+        if not candidates:
+            return "ITEM_NOT_IN_CATALOG"
+        if len(candidates) > 1:
+            return "ITEM_DESCRIPTION_AMBIGUOUS"
+        return "ITEM_NOT_PROCESSED"
+
+    if "no exact catalog match" in reason:
+        return "ITEM_NOT_IN_CATALOG"
+    if "ambiguous" in reason:
+        return "ITEM_DESCRIPTION_AMBIGUOUS"
+    if "insufficient stock" in reason:
+        return "OUT_OF_STOCK"
+    if "not unambiguously stated" in reason:
+        return "QUANTITY_UNCLEAR"
+    if "positive whole number" in reason:
+        return "INVALID_QUANTITY"
+    return "PROCESSING_ERROR"
+
+
+def build_customer_response(
+    actions: List[Dict],
+    request_id: int,
+    request_date: str,
+    request_text: str,
+    catalog_names: List[str],
+) -> Dict[str, str]:
+    """
+    Build a plain-English customer message and a readable per-item summary.
+
+    Returns {"response": <customer message>, "summary": <one line per item>}.
+    Internal identifiers (transaction IDs, stock counts, restock quantities,
+    cash figures) are never included.
+    """
+    try:
+        if not actions:
+            message = (
+                f"Thank you for your request (request #{request_id}, "
+                f"received {_format_customer_date(request_date)}).\n"
+                "Unfortunately, we could not match any of the requested items "
+                "to products in our catalog, so no order was placed and you "
+                "have not been charged.\n"
+                "Next step: Please resend your request with the exact product "
+                "names and quantities, for example \"500 sheets of A4 paper\"."
+            )
+            return {
+                "response": mask_pii(message),
+                "summary": "[ITEM_NOT_IN_CATALOG] No catalog items could be identified.",
+            }
+
+        deadline = _requested_delivery_deadline(request_text)
+
+        fulfilled_lines, pending_lines, failed_lines, summary_lines = [], [], [], []
+        fulfilled_actions = []
+
+        for action in actions:
+            code = customer_reason_code(action, request_id, deadline, catalog_names)
+            explanation, next_step = CUSTOMER_REASON_CODES[code]
+            label = _describe_item(action)
+
+            if code == "FULFILLED":
+                fulfilled_actions.append(action)
+                line = f"- {label}: ${float(action['sale_total']):,.2f} [{code}]"
+                fulfilled_lines.append(line)
+                summary_lines.append(
+                    f"[{code}] {label} - ${float(action['sale_total']):,.2f}"
+                )
+                continue
+
+            detail = explanation
+            if code in {"BACKORDERED", "DELIVERY_WINDOW_UNAVAILABLE"}:
+                detail += (
+                    " Expected supplier arrival: "
+                    f"{_format_customer_date(action.get('estimated_delivery_date'))}."
+                )
+                if code == "DELIVERY_WINDOW_UNAVAILABLE" and deadline is not None:
+                    detail += (
+                        " Your requested delivery date: "
+                        f"{deadline.strftime('%B')} {deadline.day}, {deadline.year}."
+                    )
+
+            line = f"- {label} [{code}]: {detail}"
+            if next_step:
+                line += f" Next step: {next_step}"
+
+            if code in {"BACKORDERED", "DELIVERY_WINDOW_UNAVAILABLE"}:
+                pending_lines.append(line)
+            else:
+                failed_lines.append(line)
+            summary_lines.append(f"[{code}] {label} - {detail}")
+
+        sections = [
+            f"Thank you for your order (request #{request_id}, received "
+            f"{_format_customer_date(request_date)}). Here is the status of "
+            "each item you requested:"
+        ]
+        if fulfilled_lines:
+            sections.append("Confirmed and fulfilled:\n" + "\n".join(fulfilled_lines))
+        if pending_lines:
+            sections.append("Waiting for new stock:\n" + "\n".join(pending_lines))
+        if failed_lines:
+            sections.append("Could not be fulfilled:\n" + "\n".join(failed_lines))
+
+        if fulfilled_actions:
+            total = sum(float(action["sale_total"]) for action in fulfilled_actions)
+            example = fulfilled_actions[0]
+            sections.append(
+                "How we calculated this:\n"
+                f"- Each item's price is the catalog unit price x quantity "
+                f"(for example, {example['quantity']:,} x "
+                f"${float(example['unit_price']):.2f} = "
+                f"${float(example['sale_total']):,.2f}).\n"
+                "- Standard catalog prices were used; no bulk discount was applied.\n"
+                "- No taxes or shipping fees were added.\n"
+                f"- Total charged: ${total:,.2f}, for confirmed items only. "
+                "Items waiting for stock or not fulfilled were not charged."
+            )
+        else:
+            sections.append(
+                "You have not been charged, because no items could be "
+                "fulfilled at this time."
+            )
+
+        return {
+            "response": mask_pii("\n\n".join(sections)),
+            "summary": mask_pii("\n".join(summary_lines)),
+        }
+
+    except Exception:
+        # Never expose stack traces or raw database errors to the customer.
+        return {
+            "response": CUSTOMER_SAFE_ERROR_MESSAGE,
+            "summary": "[PROCESSING_ERROR] The customer response could not be generated.",
+        }
+
+
+
 # Run your test scenarios by writing them here. Make sure to keep track of them.
 
 def run_test_scenarios():
@@ -1608,10 +1919,11 @@ def run_test_scenarios():
             actions = active_request_context["actions"]
             if not actions:
                 return {
-                    "response": "We could not verify or record this order. Please review the request and try again.",
+                    "response": CUSTOMER_SAFE_ERROR_MESSAGE,
                     "fulfillment_status": "system_error",
                     "fulfillment_reason": "The agent run failed before any validated order action was recorded.",
                     "fulfillment_actions": [],
+                    "fulfillment_summary": "[PROCESSING_ERROR] The order could not be processed.",
                 }
 
         # First identify requested items that the agent did not process.
@@ -1740,53 +2052,22 @@ def run_test_scenarios():
                 )
             )
 
-        response = "We could not identify any catalog items in this request."
-        if actions:
-            response_lines = []
-            for action in actions:
-                item_name = action["item_name"]
-                quantity = action["quantity"]
-                if action["status"] == "fulfilled":
-                    response_lines.append(
-                        f"Fulfilled {quantity} units of {item_name} for "
-                        f"${action['sale_total']:.2f} "
-                        f"({quantity} x ${action['unit_price']:.2f} catalog unit price; no discount applied)."
-                    )
-                elif action["status"] == "restock_ordered":
-                    response_lines.append(
-                        f"Supplier restock recorded: "
-                        f"{action['restock_quantity']} units of {item_name}; "
-                        f"estimated supplier arrival "
-                        f"{action['estimated_delivery_date']}. "
-                        f"The customer order for {quantity} units "
-                        "has not yet been fulfilled."
-                    )
-                else:
-                    restock_note = ""
-                    if action.get("restock_recommended"):
-                        funding_message = (
-                            "estimated restock cost is within available funds"
-                            if action.get("restock_fundable")
-                            else "estimated restock cost exceeds available funds"
-                        )
-                        restock_note = (
-                            f" A restock could be considered; estimated delivery is "
-                            f"{action['estimated_delivery_date']} and the {funding_message}."
-                        )
-                    response_lines.append(
-                        f"Could not fulfill {quantity} units of {item_name}: "
-                        f"{action['reason']}{restock_note}"
-                    )
-            response = "\n".join(response_lines)
-            if successful_actions:
-                total = sum(float(action["sale_total"]) for action in successful_actions)
-                response += f"\nTotal for recorded sales: ${total:.2f}."
+        # Build the plain-English customer message (reason codes, calculation
+        # notes, PII masking, and customer-safe errors).
+        customer_output = build_customer_response(
+            actions,
+            request_id,
+            request_date,
+            request,
+            catalog_names,
+        )
 
         return {
-            "response": response,
+            "response": customer_output["response"],
             "fulfillment_status": fulfillment_status,
             "fulfillment_reason": fulfillment_reason,
             "fulfillment_actions": actions,
+            "fulfillment_summary": customer_output["summary"],
         }
 
     ############
@@ -1842,7 +2123,7 @@ def run_test_scenarios():
                 "response": response,
                 "fulfillment_status": request_outcome["fulfillment_status"],
                 "fulfillment_reason": request_outcome["fulfillment_reason"],
-                "fulfillment_actions": json.dumps(request_outcome["fulfillment_actions"]),
+                "fulfillment_actions": request_outcome["fulfillment_summary"],
             }
         )
 
